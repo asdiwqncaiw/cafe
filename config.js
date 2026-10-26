@@ -1,6 +1,6 @@
-// Сюда вставляются два значения из Supabase (Project Settings -> API).
-// Они не секретные, их можно хранить в публичном репозитории.
+// Адрес и публичный ключ проекта Supabase (Project Settings -> API).
+// Они не секретные, их можно хранить в публичном репозитории: данные защищены правилами в базе.
 window.CAFE_CONFIG = {
-  url: "ВСТАВЬ_СЮДА_Project_URL",
-  key: "ВСТАВЬ_СЮДА_anon_или_publishable_ключ"
+  url: "https://hxzfljbtufynudrkctfb.supabase.co",
+  key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4emZsamJ0dWZ5bnVkcmtjdGZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMDcwODAsImV4cCI6MjEwODU4MzA4MH0._CVdjXVRDFWkHGBPcSi1GW0vN_WegS-Ejh7u0JbK1Oc"
 };
