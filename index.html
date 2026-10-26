@@ -1122,10 +1122,23 @@ function parseCalendar(g){
   });
   return {month, year, days};
 }
-async function fetchMonth(y, m){
+/* список вкладок таблицы (название → gid): берём со страницы просмотра таблицы */
+let tabsCache = null;
+async function sheetTabs(id, fresh){
+  if (tabsCache && !fresh) return tabsCache;
+  try{
+    const t = await (await fetch(`https://docs.google.com/spreadsheets/d/${id}/htmlview`, {cache:'no-store'})).text();
+    const dec = x => { try{ return JSON.parse('"' + x + '"'); }catch(e){ return x; } };
+    tabsCache = [...t.matchAll(/\{name:\s*"((?:[^"\\]|\\.)+)"[^}]*?gid:\s*"(\d+)"/g)].map(mm => ({name:dec(mm[1]).trim().toLowerCase().replace(/ё/g, 'е'), gid:mm[2]}));
+  }catch(e){ tabsCache = []; }
+  return tabsCache;
+}
+async function fetchMonth(y, m, fresh){
   const id = sheetId(SCHED); if (!id) throw new Error('Таблица графика не подключена');
   const custom = cfg.schedule && cfg.schedule.tabs && cfg.schedule.tabs[ym(y, m)];
-  const tries = custom ? [custom] : [cap(MONTHS[m]) + ' ' + y, cap(MONTHS[m]), MONTHS[m] + ' ' + y, MONTHS[m]];
+  /* вкладки называются по месяцу: «Октябрь», «Ноябрь» (бывают лишние пробелы); год сверяем по заголовку листа */
+  const byName = (await sheetTabs(id, fresh)).filter(t => t.name.startsWith(MONTHS[m])).map(t => t.gid);
+  const tries = custom ? [custom] : byName.concat([cap(MONTHS[m]) + ' ' + y, cap(MONTHS[m])]);
   for (const tab of tries){
     const q = /^\d+$/.test(String(tab)) ? 'gid=' + tab : 'sheet=' + encodeURIComponent(tab);
     let r;
@@ -1151,7 +1164,7 @@ async function loadSchedule(force){
   try{
     for (const [y, m] of want){
       const k = ym(y, m); if (seen.has(k)) continue; seen.add(k);
-      const days = await fetchMonth(y, m);
+      const days = await fetchMonth(y, m, force);
       if (days){ S.sched.data[k] = {days, at:now}; try{ localStorage.setItem('cafe.sched.' + k, JSON.stringify(S.sched.data[k])); }catch(e){} }
       else if (k === S.sched.view) S.sched.data[k] = {days:null, at:now, missing:true};
     }
