@@ -1,0 +1,99 @@
+# Раз в сутки:
+#   1) пингует Supabase, чтобы бесплатный проект не уснул от неактивности;
+#   2) если отчёт за сегодня никто не сдал, база сама отправляет сводку Гарику в Telegram;
+#   3) раз в 50 дней делает пустой коммит, иначе GitHub сам выключает расписание
+#      в репозиториях без активности (через 60 дней).
+#
+# Нужные секреты: Settings -> Secrets and variables -> Actions -> New repository secret
+#   SUPABASE_URL       адрес проекта, как в config.js (https://xxxx.supabase.co)
+#   SUPABASE_ANON_KEY  ключ anon или publishable, как в config.js
+#   CRON_SECRET        секрет из Dev-панели (Кабинет -> Dev-панель -> GitHub Actions)
+#
+# Проверить вручную: вкладка Actions -> Daily ping and evening report -> Run workflow.
+
+name: Daily ping and evening report
+
+on:
+  schedule:
+    # 18:00 UTC = 21:00 по Москве. GitHub иногда запускает с опозданием на 5-30 минут.
+    - cron: '0 18 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-cron
+  cancel-in-progress: false
+
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+    steps:
+      - name: Ping Supabase
+        run: |
+          set -u
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::Добавьте секреты SUPABASE_URL и SUPABASE_ANON_KEY"
+            exit 1
+          fi
+          URL="${SUPABASE_URL%/}"
+          for i in 1 2 3; do
+            if curl -sS --fail-with-body --max-time 30 \
+                 -X POST "$URL/rest/v1/rpc/ping" \
+                 -H "apikey: $SUPABASE_ANON_KEY" \
+                 -H "Content-Type: application/json" \
+                 -d '{}'; then
+              echo ""
+              echo "Supabase отвечает"
+              exit 0
+            fi
+            echo "Попытка $i не удалась, жду 20 секунд"
+            sleep 20
+          done
+          echo "::error::Supabase не отвечает. Возможно, проект на паузе: откройте supabase.com и нажмите Restore."
+          exit 1
+
+      - name: Evening report to Telegram
+        run: |
+          set -u
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET не задан, вечерняя сводка пропущена (пинг сработал)"
+            exit 0
+          fi
+          URL="${SUPABASE_URL%/}"
+          BODY=$(printf '{"p_secret":"%s"}' "$CRON_SECRET")
+          for i in 1 2 3; do
+            if curl -sS --fail-with-body --max-time 30 \
+                 -X POST "$URL/rest/v1/rpc/cron_evening_report" \
+                 -H "apikey: $SUPABASE_ANON_KEY" \
+                 -H "Content-Type: application/json" \
+                 -d "$BODY"; then
+              echo ""
+              exit 0
+            fi
+            echo "Попытка $i не удалась, жду 20 секунд"
+            sleep 20
+          done
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Keep schedule alive
+        run: |
+          last=$(git log -1 --format=%ct)
+          days=$(( ( $(date +%s) - last ) / 86400 ))
+          echo "Дней с последнего коммита: $days"
+          if [ "$days" -ge 50 ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit --allow-empty -m "keepalive: расписание не засыпает"
+            git push
+          fi
