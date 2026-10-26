@@ -2,13 +2,16 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#1a110c">
 <meta name="color-scheme" content="dark">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Склад кафе">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
@@ -253,6 +256,109 @@ pre.out{white-space:pre-wrap;word-break:break-word;background:#150d09;border:1px
 .seg2 button.on.w{background:var(--warnbg);color:var(--warn)}
 .seg2 button.on.b{background:var(--badbg);color:var(--bad)}
 
+/* ===== v5: спокойнее и плотнее, без «нейросетевого» блеска ===== */
+:root{
+  --bg:#17100b; --s1:#21170f; --s2:#2b1f16; --s3:#38291e;
+  --line:rgba(245,230,205,.07); --line2:rgba(245,230,205,.14);
+  --red:#f04a3e; --redbg:rgba(240,74,62,.16); --red2:#ff7b70;
+  --bad:#ff7b70; --badbg:rgba(240,74,62,.16);
+  --f:"Onest",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+/* без зума по двойному тапу и без съезжания вбок */
+html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:hidden}
+body{overflow-x:hidden;max-width:100vw;font-weight:450}
+body::before{display:none}
+input,select,textarea{font-size:16px!important;max-width:100%;min-width:0;border-radius:10px}
+input[type=date],input[type=time]{display:block;-webkit-appearance:none;appearance:none;line-height:50px;text-align:left}
+input[type=date]::-webkit-date-and-time-value{text-align:left}
+.sheet{overflow-x:hidden;border-radius:20px 20px 0 0}
+button:active{transform:scale(.98)}
+
+.hd h1{font-size:26px;font-weight:700;letter-spacing:-.015em}
+h2{font-size:16px;font-weight:700}
+.ibtn{border-radius:11px;width:42px;height:42px}
+.btn{border-radius:12px;min-height:50px;font-weight:600}
+.btn.sm{border-radius:10px}
+.btn.danger{background:var(--redbg);color:var(--red2)}
+.chip{border-radius:12px;min-height:46px;font-weight:500}
+.chip.on .nm{font-weight:600}
+.chip.on .cb{height:46px}
+.cnt{border-radius:7px;font-weight:700}
+.fchip{border-radius:10px;min-height:40px;font-weight:500}
+.list,.card{border-radius:14px}
+.menu,.pers,.shiftc{border-radius:14px}
+.sb{border-radius:10px}
+.sn{font-weight:700}
+.pill,.badge{border-radius:6px;font-weight:600;padding:4px 8px}
+.done-btn{border-radius:10px}
+.ticket{border-radius:16px}
+.t-stub button{border-radius:10px}
+.t-main b{font-weight:700}
+.sheet h3{font-weight:700;font-size:22px}
+.zhead{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);font-weight:600}
+.logo .mark{border-radius:20px}
+.auth-t{font-weight:700}
+.seg2{border-radius:12px}
+.seg2 button{border-radius:9px}
+.mk{border-radius:9px}
+
+/* «закончилось» — ярко-красным, «мало» — янтарным */
+.pill.bad,.badge.bad{background:var(--red);color:#fff}
+.badge.warn,.pill.warn{background:rgba(230,189,98,.18);color:#f2c96b}
+.mk.b{background:var(--red);color:#fff;border-color:transparent}
+.tabs .dot{background:var(--red);color:#fff}
+.err{background:var(--redbg);color:var(--red2)}
+
+/* склад таблицей: строки в одном блоке вместо отдельных карточек */
+.prod{border:0;border-radius:0;margin:0;background:transparent;padding:12px 14px}
+.list > .prod + .prod{border-top:1px solid var(--line)}
+.prod .pn{font-weight:600;font-size:16px}
+.prod .pq b{font-size:24px;font-weight:700}
+.prod.zero{box-shadow:inset 3px 0 0 var(--red)}
+.prod.zero .pq b{color:var(--red2)}
+.prod.low{box-shadow:inset 3px 0 0 var(--warn)}
+.prod.low .pq b{color:#f2c96b}
+.bar{display:none}
+
+/* срочное: без градиентов и пульсаций */
+.urgent{background:none;border:0;padding:0;margin:0 0 6px}
+.urgent-h{padding:2px 2px 10px}
+.urgent-h b{font-size:18px;font-weight:700;color:var(--red2)}
+.urgent-h b::before{display:none}
+.cntbad{background:var(--red);color:#fff;border-radius:8px;height:26px;min-width:26px;font-size:14px}
+.urgent .list{border-color:rgba(240,74,62,.45)}
+.urgent .need{box-shadow:inset 3px 0 0 var(--red)}
+
+/* нижняя панель прижата к краю, без «стекла» */
+.tabs{left:0;right:0;bottom:0;max-width:none;border-radius:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));background:#1c130d;backdrop-filter:none;-webkit-backdrop-filter:none;border:0;border-top:1px solid var(--line2);box-shadow:none}
+.tabs button{border-radius:10px;font-weight:500;font-size:11px}
+.tabs button.on{background:rgba(240,223,194,.1)}
+main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+#toast{bottom:calc(80px + env(safe-area-inset-bottom))}
+.fab{bottom:calc(84px + env(safe-area-inset-bottom));border-radius:14px}
+.toast{border-radius:12px}
+
+/* ===== график: календарь как в Google Таблице ===== */
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.cal .wd{font-size:11px;font-weight:600;color:var(--mut);text-align:center;padding:6px 0 4px;text-transform:uppercase;letter-spacing:.03em}
+.cd{border:1px solid var(--line);background:var(--s1);border-radius:8px;padding:3px 3px 4px;min-height:62px;display:flex;flex-direction:column;gap:3px;text-align:left;color:var(--ink);min-width:0}
+.cd.blank{background:transparent;border-color:transparent}
+.cd .dn{font-size:11px;font-weight:600;color:var(--mut);text-align:right;line-height:1.1;padding-right:1px}
+.cd.today{border-color:var(--foam);box-shadow:0 0 0 1px var(--foam)}
+.cd.today .dn{color:var(--foam)}
+.cd.past{opacity:.55}
+.cd .nm{display:block;font-style:normal;font-size:10.5px;font-weight:600;line-height:1;padding:4px 3px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:clip;min-width:0}
+.cd .nm.empty{background:rgba(245,230,205,.07);color:var(--dim)}
+.cd.mine{background:#2a1d12}
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.legend span{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;padding:6px 10px;border-radius:8px}
+.legend small{font-weight:500;opacity:.8}
+.calnav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px}
+.calnav b{font-size:18px;font-weight:700}
+.srcline{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--mut);font-size:13px;margin-top:12px}
+.srcline a{color:var(--ink2)}
+@media (min-width:480px){.cd{min-height:74px}.cd .nm{font-size:12px;padding:5px 5px}}
+
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -333,6 +439,7 @@ const S = {
   names:{writeoff:[],lunch:[],need:[]},
   reportDay:'', q:'', stockFilter:'all', logUser:'all', logType:'all', showPast:false, sheet:null, bump:null,
   zone:loadZone(), live:false, submitting:false, needMode:'low',
+  sched:{view:'', data:{}, at:0, err:'', loading:false},
   dev:{settings:null, out:'', secretShown:false}
 };
 
@@ -387,6 +494,7 @@ const emailOf = login => login.trim().toLowerCase() + '@cafe-staff.app';
 const loginOf = email => String(email || '').split('@')[0];
 const buzz = () => { try{ navigator.vibrate && navigator.vibrate(8); }catch(e){} };
 S.reportDay = iso(startOfToday());
+S.sched.view = S.reportDay.slice(0, 7);
 
 function dayShort(d){
   const t = startOfToday();
@@ -482,6 +590,7 @@ async function loadAll(){
     if (isAdmin()) jobs.push(loadPeople(), loadWeek());
     await Promise.all(jobs);
     startLive();
+    loadSchedule();
   }catch(e){ toast(ru(e.message)); }
   finally{ S.booting = false; render(); }
 }
@@ -527,7 +636,7 @@ function render(){
   if (S.me.role === 'pending'){ app.innerHTML = waitHtml('Ждём подтверждения', 'Вы зарегистрированы как ' + esc(S.me.name) + '. Админ должен вас принять, потом нажмите «Проверить».'); return drawSheet(); }
   if (S.me.role === 'blocked'){ app.innerHTML = waitHtml('Доступ закрыт', 'Обратитесь к администратору.', true); return drawSheet(); }
 
-  const tabs = [['report','report','Отчёт'],['stock','box','Склад'],['shifts','cal','Смены'],['log','clock','Журнал'],['me','user','Кабинет']];
+  const tabs = [['report','report','Отчёт'],['stock','box','Склад'],['shifts','cal','График'],['log','clock','Журнал'],['me','user','Кабинет']];
   if (isAdmin()) tabs.unshift(['home','home','Сводка']);
   const pend = isAdmin() ? S.people.filter(p => p.role === 'pending').length : 0;
   const urg = isAdmin() ? S.needs.length + lowNotListed().length : 0;
@@ -535,7 +644,7 @@ function render(){
     tabs.map(t => { const on = S.tab === t[0] || ((S.tab === 'people' || S.tab === 'dev') && t[0] === 'me');
       return `<button class="${on?'on':''}" data-a="tab" data-v="${t[0]}">${ic(t[1])}${t[2]}${t[0]==='me'&&pend?`<i class="dot">${pend}</i>`:''}${t[0]==='home'&&urg?`<i class="dot">${urg}</i>`:''}</button>`; }).join('') + '</nav>' +
     (S.tab==='stock' && isAdmin() ? `<button class="fab" data-a="newProduct">${ic('plus')}Продукт</button>` : '') +
-    (S.tab==='shifts' && isAdmin() ? `<button class="fab" data-a="newShift">${ic('plus')}Смена</button>` : '');
+    '';
   window.scrollTo(0, same ? y : 0);
   S.lastTab = S.tab;
   drawSheet();
@@ -774,7 +883,7 @@ function setExact(k, n, v){
 function lowNotListed(){
   const open = new Set(S.needs.map(n => nkey(n.name)));
   return S.products.filter(p => isLow(p) && !open.has(nkey(p.name)))
-    .sort((a, b) => ['cups','bar','kitchen'].indexOf(a.zone) - ['cups','bar','kitchen'].indexOf(b.zone) || a.name.localeCompare(b.name, 'ru'));
+    .sort((a, b) => (isZero(b) - isZero(a)) || ['cups','bar','kitchen'].indexOf(a.zone) - ['cups','bar','kitchen'].indexOf(b.zone) || a.name.localeCompare(b.name, 'ru'));
 }
 function orderAllText(){
   const lines = S.needs.map(n => n.name + (n.status === 'low' ? ' (заканчивается)' : ''))
@@ -802,7 +911,7 @@ function homeHtml(){
   const tw = tRows.filter(r => r.kind === 'writeoff').length, tl = tRows.filter(r => r.kind === 'lunch').length;
   const who = [...new Set(tRows.map(r => r.user_name).filter(Boolean))];
   const dr = S.dayReports.find(x => x.day === today);
-  const shiftsToday = S.shifts.filter(x => x.day === today);
+  const shiftsToday = (shiftsOn(today) || []).filter(Boolean);
   const pend = S.people.filter(p => p.role === 'pending').length;
   const top = weekTop();
   const status = dr ? `<span class="badge ok">сдан в ${timeOf(dr.submitted_at)}, ${esc(dr.submitted_by || '')}</span>`
@@ -816,7 +925,7 @@ function homeHtml(){
     <span>${esc(n.created_by || '')}, ${dmDate(n.created_at)}${n.note ? ', ' + esc(n.note) : ''}</span></button>
     <span class="pill ${n.status==='out'?'bad':'warn'}">${n.status==='out' ? 'закончилось' : 'заканчивается'}</span>
     <button class="done-btn" data-a="needDone" data-id="${n.id}" aria-label="Привезли">${ic('check')}</button></div>`;
-  const lowRows = lowP.map(p => `<button class="need" style="width:100%;border:0;background:none;color:inherit;text-align:left" data-a="open" data-id="${p.id}"><div class="main"><b>${esc(p.name)}</b><span>${esc(zoneName(p.zone))}, минимум ${fmt(p.min_qty)} ${esc(p.unit)}${p.pack_info ? ' · ' + esc(p.pack_info) : ''}</span></div><b style="font-size:22px;white-space:nowrap">${fmt(p.qty)} <small class="mut" style="font-size:13px">${esc(p.unit)}</small></b></button>`).join('');
+  const lowRows = lowP.map(p => `<button class="need" style="width:100%;border:0;background:none;color:inherit;text-align:left" data-a="open" data-id="${p.id}"><div class="main"><b>${esc(p.name)}</b><span>${esc(zoneName(p.zone))}, минимум ${fmt(p.min_qty)} ${esc(p.unit)}${p.pack_info ? ' · ' + esc(p.pack_info) : ''}</span></div>${isZero(p) ? '<span class="pill bad">закончилось</span>' : `<b style="font-size:22px;white-space:nowrap;color:#f2c96b">${fmt(p.qty)} <small class="mut" style="font-size:13px">${esc(p.unit)}</small></b>`}</button>`).join('');
   return header('Сводка', cap(dayLabel(today)) + `<i id="live" class="live ${S.live ? 'on' : ''}" title="Обновляется сама"></i>`) +
     (pend ? `<button class="menu" data-a="tab" data-v="people" style="background:var(--warnbg);border-color:transparent"><span>Ждут подтверждения: ${pend}</span>${ic('right')}</button>` : '') +
     /* главное на экране Гарика: что срочно заказать */
@@ -831,7 +940,7 @@ function homeHtml(){
       <div class="mut" style="margin-top:8px;font-size:14px">${tRows.length ? `Списаний: ${tw}, обедов: ${tl}. Вносили: ${who.map(esc).join(', ')}` : 'Сегодня в отчёт ещё ничего не внесли'}</div>
       ${weekStrip()}</div>
      <h2>Сегодня на смене</h2>
-     <div class="list">${shiftsToday.length ? shiftsToday.map(x => `<div class="li"><b>${esc(x.profiles ? x.profiles.name : '')}</b><span style="font-weight:700">${hm(x.start_time)} - ${hm(x.end_time)}</span></div>`).join('') : '<div class="empty-row">Смен на сегодня нет</div>'}</div>
+     ${shiftsToday.length ? `<div class="legend" style="margin-top:0">${shiftsToday.map(n => `<span style="${personStyle(n)};font-size:15px;padding:9px 13px">${esc(personName(n))}</span>`).join('')}</div>` : `<div class="list"><div class="empty-row">${SCHED ? 'В графике на сегодня никого' : 'График ещё не подключён'}</div></div>`}
      ${exp.length ? '<h2>Сроки годности</h2><div class="list">' + exp.map(p => { const e = expInfo(p); return `<button class="li" style="width:100%;border:0;background:none;color:inherit" data-a="open" data-id="${p.id}"><b>${esc(p.name)}</b><span class="pill ${e.cls}">${e.t}</span></button>`; }).join('') + '</div>' : ''}
      <h2>Списания за 7 дней</h2>
      <div class="list">${top.length ? top.slice(0,6).map(t => `<div class="li"><span class="ln">${esc(t.n)}</span><b style="font-size:20px">${fmt(t.q)}</b></div>`).join('') : '<div class="empty-row">За неделю списаний нет</div>'}</div>
@@ -845,7 +954,9 @@ const tracked = p => p.track !== false;
 const RANK = [/^кофе/i, /^молоко/i, /^сливки/i, /^крышки/i, /^стаканы/i, /^трубочки/i];
 const rankOf = p => { const i = RANK.findIndex(r => r.test(p.name)); return i < 0 ? 99 : i; };
 const byRank = (a, b) => rankOf(a) - rankOf(b) || a.name.localeCompare(b.name, 'ru');
-const isLow = p => tracked(p) && +p.min_qty > 0 && +p.qty <= +p.min_qty;
+/* 0 на складе — это не «мало», а «закончилось» */
+const isZero = p => tracked(p) && +p.qty <= 0;
+const isLow = p => tracked(p) && (isZero(p) || (+p.min_qty > 0 && +p.qty <= +p.min_qty));
 const needOf = name => S.needs.find(n => nkey(n.name) === nkey(name));
 function expInfo(p){
   if (!p.expires_on) return null;
@@ -876,15 +987,16 @@ function markRow(p){
 }
 function groupHtml(g){
   const t = g.filter(tracked).sort(byRank), m = g.filter(p => !tracked(p));
-  return t.map(prodCard).join('') +
+  return (t.length ? `<div class="list" style="margin-bottom:10px">${t.map(prodCard).join('')}</div>` : '') +
     (m.length ? `<div class="hint" style="margin:${t.length ? 14 : 0}px 2px 8px">Без счёта: «Мало», когда заканчивается (чтобы успеть заказать), «Нет», когда закончилось</div><div class="list" style="margin-bottom:10px">${m.map(markRow).join('')}</div>` : '');
 }
 function prodCard(p){
-  const e = expInfo(p), low = isLow(p), pct = +p.min_qty > 0 ? Math.min(100, Math.round(+p.qty / (+p.min_qty * 2) * 100)) : null;
-  return `<button class="prod" data-a="open" data-id="${p.id}"><div style="flex:1;min-width:0"><div class="pn">${esc(p.name)}</div>
+  const e = expInfo(p), zero = isZero(p), low = !zero && isLow(p);
+  const st = zero ? '<span class="badge bad">закончилось</span>' : low ? '<span class="badge warn">мало</span>' : '';
+  const meta = st + (e ? `<span class="badge ${e.cls}">${e.t}</span>` : '') + (p.expires_on && !e ? `<span class="badge">до ${dmy(p.expires_on)}</span>` : '');
+  return `<button class="prod ${zero ? 'zero' : low ? 'low' : ''}" data-a="open" data-id="${p.id}"><div style="flex:1;min-width:0"><div class="pn">${esc(p.name)}</div>
     ${packHtml(p.pack_info)}
-    <div class="pm">${low ? '<span class="badge bad">мало</span>' : ''}${e ? `<span class="badge ${e.cls}">${e.t}</span>` : ''}${p.expires_on && !e ? `<span class="badge">до ${dmy(p.expires_on)}</span>` : ''}</div>
-    ${pct != null ? `<i class="bar ${low ? 'low' : ''}"><u style="width:${Math.max(pct, 4)}%"></u></i>` : ''}</div>
+    ${meta ? `<div class="pm">${meta}</div>` : ''}</div>
     <div class="pq"><b>${fmt(p.qty)}</b><small>${esc(p.unit)}${+p.min_qty > 0 ? ', мин. ' + fmt(p.min_qty) : ''}</small></div></button>`;
 }
 function stockListHtml(){
@@ -947,18 +1059,153 @@ function logHtml(){
 }
 
 /* ================= СМЕНЫ ================= */
+/* ================= ГРАФИК (из Google Таблицы) =================
+   График ведут в Google Таблице, как раньше. Приложение только читает её по ссылке из config.js.
+   Таблица должна быть открыта «Всем, у кого есть ссылка: читатель».
+   Вкладка месяца ищется по названию «Ноябрь 2026» (или «Ноябрь»); месяц сверяется по заголовку на листе. */
+const MONTHS = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+const MONTH_RX = /(январ|феврал|март|апрел|ма[йя]|июн|июл|август|сентябр|октябр|ноябр|декабр)[а-я]*\s+(\d{4})/i;
+const MONTH_STEMS = ['январ','феврал','март','апрел','ма','июн','июл','август','сентябр','октябр','ноябр','декабр'];
+/* цвета как в таблице */
+const PERSON = {
+  'ангелина':  {bg:'#5c2f8a', fg:'#ffffff'},
+  'александра':{bg:'#bfe1f7', fg:'#0d4f82'},
+  'савва':     {bg:'#127349', fg:'#ffffff'},
+  'амина':     {bg:'#f7a9e8', fg:'#5c1049'}
+};
+const SCHED = (cfg.schedule && cfg.schedule.url) || '';
+const sheetId = u => { const m = String(u || '').match(/\/d\/([\w-]{20,})/); return m ? m[1] : null; };
+const ym = (y, m) => y + '-' + pad(m + 1);
+function personKey(n){
+  const k = String(n || '').trim().toLowerCase().replace(/ё/g, 'е');
+  if (!k) return '';
+  const hit = Object.keys(PERSON).find(p => p === k || (k.length >= 4 && p.slice(0, 4) === k.slice(0, 4)));
+  return hit || k;
+}
+const personName = n => { const k = personKey(n); return PERSON[k] ? cap(k) : String(n).trim(); };
+const personStyle = n => { const c = PERSON[personKey(n)]; return c ? `background:${c.bg};color:${c.fg}` : 'background:#5a4a3d;color:#fff'; };
+const meKey = () => personKey(S.me && S.me.name);
+
+function parseCsv(t){
+  const rows = [], n = t.length; let row = [], f = '', q = false;
+  for (let i = 0; i < n; i++){
+    const c = t[i];
+    if (q){ if (c === '"'){ if (t[i + 1] === '"'){ f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true;
+    else if (c === ','){ row.push(f); f = ''; }
+    else if (c === '\n' || c === '\r'){ if (c === '\r' && t[i + 1] === '\n') i++; row.push(f); rows.push(row); row = []; f = ''; }
+    else f += c;
+  }
+  if (f !== '' || row.length){ row.push(f); rows.push(row); }
+  return rows;
+}
+/* лист-календарь: строка с числами 1–31, под каждым числом в том же столбце — имена до следующей строки с числами */
+function parseCalendar(g){
+  let month = -1, year = 0;
+  for (const r of g){ for (const c of r){ const m = String(c).match(MONTH_RX); if (m){ year = +m[2]; month = MONTH_STEMS.findIndex(st => m[1].toLowerCase().startsWith(st)); break; } } if (month >= 0) break; }
+  const isNum = v => /^\s*\d{1,2}(\.0+)?\s*$/.test(v) && +v >= 1 && +v <= 31;
+  const dayRows = [];
+  g.forEach((r, i) => { const nums = r.filter(isNum).length, other = r.filter(v => String(v).trim() && !isNum(v)).length; if (nums && !other) dayRows.push(i); });
+  const days = {};
+  dayRows.forEach((ri, k) => {
+    const end = k + 1 < dayRows.length ? dayRows[k + 1] : Math.min(g.length, ri + 4);
+    g[ri].forEach((v, c) => {
+      if (!isNum(v)) return;
+      const names = [];
+      for (let r = ri + 1; r < end; r++){
+        const x = String((g[r] || [])[c] || '').trim();
+        if (!x || isNum(x) || MONTH_RX.test(x) || /^(понедельник|вторник|среда|четверг|пятница|суббота|воскресенье)$/i.test(x)) continue;
+        names.push(/^пусто$/i.test(x) ? '' : x);
+      }
+      days[+v] = names;
+    });
+  });
+  return {month, year, days};
+}
+async function fetchMonth(y, m){
+  const id = sheetId(SCHED); if (!id) throw new Error('Таблица графика не подключена');
+  const custom = cfg.schedule && cfg.schedule.tabs && cfg.schedule.tabs[ym(y, m)];
+  const tries = custom ? [custom] : [cap(MONTHS[m]) + ' ' + y, cap(MONTHS[m]), MONTHS[m] + ' ' + y, MONTHS[m]];
+  for (const tab of tries){
+    const q = /^\d+$/.test(String(tab)) ? 'gid=' + tab : 'sheet=' + encodeURIComponent(tab);
+    let r;
+    try{ r = await fetch(`https://docs.google.com/spreadsheets/d/${id}/gviz/tq?tqx=out:csv&headers=0&${q}`, {cache:'no-store'}); }
+    catch(e){ throw new Error('Нет связи с Google Таблицей'); }
+    if (!r.ok) continue;
+    const cal = parseCalendar(parseCsv(await r.text()));
+    /* Google при неизвестной вкладке отдаёт первую, поэтому сверяем месяц по заголовку */
+    if (Object.keys(cal.days).length >= 20 && (cal.month < 0 || (cal.month === m && cal.year === y))) return cal.days;
+  }
+  return null;
+}
+const schedCache = k => { try{ return JSON.parse(localStorage.getItem('cafe.sched.' + k) || 'null'); }catch(e){ return null; } };
+function monthDays(y, m){ const k = ym(y, m); return (S.sched.data[k] || schedCache(k) || {}).days || null; }
+async function loadSchedule(force){
+  if (!SCHED) return;
+  const now = Date.now();
+  if (!force && S.sched.at && now - S.sched.at < 5 * 60 * 1000) return;
+  S.sched.at = now; S.sched.loading = true;
+  const t = startOfToday(), [vy, vm] = S.sched.view.split('-').map(Number);
+  const want = [[t.getFullYear(), t.getMonth()], [new Date(t.getFullYear(), t.getMonth() + 1, 1).getFullYear(), (t.getMonth() + 1) % 12], [vy, vm - 1]];
+  const seen = new Set();
+  try{
+    for (const [y, m] of want){
+      const k = ym(y, m); if (seen.has(k)) continue; seen.add(k);
+      const days = await fetchMonth(y, m);
+      if (days){ S.sched.data[k] = {days, at:now}; try{ localStorage.setItem('cafe.sched.' + k, JSON.stringify(S.sched.data[k])); }catch(e){} }
+      else if (k === S.sched.view) S.sched.data[k] = {days:null, at:now, missing:true};
+    }
+    S.sched.err = '';
+  }catch(e){ S.sched.err = e.message; }
+  S.sched.loading = false;
+  if (!S.sheet) render();
+}
+function shiftsOn(dateIso){
+  const [y, m, d] = dateIso.split('-').map(Number), days = monthDays(y, m - 1);
+  return days ? (days[d] || []) : null;
+}
+/* мои ближайшие смены из таблицы */
+function myShifts(limit){
+  const k = meKey(), out = [], t = startOfToday();
+  for (let i = 0; i < 45 && out.length < limit; i++){
+    const d = iso(addDays(t, i)), names = shiftsOn(d);
+    if (names && names.some(n => personKey(n) === k)) out.push(d);
+  }
+  return out;
+}
 function shiftsHtml(){
-  const today = iso(startOfToday());
-  const list = S.shifts.filter(s => S.showPast || s.day >= today);
-  const days = {}; list.forEach(s => (days[s.day] = days[s.day] || []).push(s));
-  const keys = Object.keys(days).sort();
-  return header(isAdmin() ? 'График смен' : 'Мои смены', '') +
-    (keys.length ? keys.map(k => `<div class="dayh ${k === today ? 'today' : ''}">${k === today ? 'Сегодня, ' + dayLabel(k) : cap(dayLabel(k))}</div>` +
-      days[k].map(s => `<button class="shiftc ${s.user_id === S.me.id ? 'me' : ''}" ${isAdmin() ? `data-a="editShift" data-id="${s.id}"` : ''}>
-        <div><b>${esc(s.profiles ? s.profiles.name : '')}</b>${s.note ? `<div class="note">${esc(s.note)}</div>` : ''}</div>
-        <div class="t">${hm(s.start_time)} - ${hm(s.end_time)}</div></button>`).join('')).join('')
-      : '<div class="empty">Смен пока нет</div>') +
-    `<button class="fchip" style="margin-top:14px" data-a="past">${S.showPast ? 'Скрыть прошедшие' : 'Показать прошедшие за 7 дней'}</button>`;
+  const [y, m] = S.sched.view.split('-').map(Number), mi = m - 1;
+  const title = cap(MONTHS[mi]) + ' ' + y;
+  const nav = `<div class="calnav"><button class="ibtn" data-a="calMonth" data-v="-1" aria-label="Раньше">${ic('left')}</button><b>${title}</b><button class="ibtn" data-a="calMonth" data-v="1" aria-label="Позже">${ic('right')}</button></div>`;
+  if (!SCHED) return header('График', '', '') + nav + `<div class="card">График берётся из Google Таблицы, где вы его ведёте. Ссылку на таблицу подключает разработчик.</div>`;
+  const days = monthDays(y, mi), entry = S.sched.data[S.sched.view];
+  const todayIso = iso(startOfToday()), mk = meKey();
+  let grid = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(w => `<div class="wd">${w}</div>`).join('');
+  const first = (new Date(y, mi, 1).getDay() + 6) % 7, total = new Date(y, mi + 1, 0).getDate();
+  for (let i = 0; i < first; i++) grid += '<div class="cd blank"></div>';
+  const count = {};
+  for (let d = 1; d <= total; d++){
+    const di = y + '-' + pad(m) + '-' + pad(d), names = days ? (days[d] || []) : [];
+    const slots = names.length ? names : (days ? ['', ''] : []);
+    slots.forEach(n => { if (n){ const k = personName(n); count[k] = (count[k] || 0) + 1; } });
+    const mine = mk && names.some(n => personKey(n) === mk);
+    grid += `<button class="cd ${di === todayIso ? 'today' : ''} ${di < todayIso ? 'past' : ''} ${mine ? 'mine' : ''}" data-a="calDay" data-d="${di}"><span class="dn">${d}</span>` +
+      slots.slice(0, 3).map(n => n ? `<i class="nm" style="${personStyle(n)}">${esc(personName(n))}</i>` : '<i class="nm empty">—</i>').join('') + '</button>';
+  }
+  const legend = Object.keys(count).sort().map(n => `<span style="${personStyle(n)}">${esc(n)} <small>${count[n]} ${plural(count[n], ['смена','смены','смен'])}</small></span>`).join('');
+  const mine = myShifts(5);
+  const state = S.sched.err ? `<div class="err" style="margin-top:12px">${esc(S.sched.err)}</div>`
+    : (!days && (entry || !S.sched.loading)) ? `<div class="card" style="margin-top:12px">В таблице нет листа «${title}» или он ещё не заполнен.</div>`
+    : (!days ? '<div class="empty">Загружаю график…</div>' : '');
+  return header('График', 'Из Google Таблицы', `<button class="ibtn" data-a="calRefresh" aria-label="Обновить">${ic('refresh')}</button>`) + nav +
+    (days ? `<div class="cal">${grid}</div><div class="legend">${legend}</div>` : '') + state +
+    (mk && mine.length ? `<h2>Мои ближайшие смены</h2><div class="list">${mine.map(d => `<div class="li"><b>${cap(dayLabel(d))}</b>${d === todayIso ? '<span class="pill ok">сегодня</span>' : ''}</div>`).join('')}</div>` : '') +
+    `<div class="srcline"><span>${entry && entry.at ? 'Обновлено в ' + timeOf(entry.at) : ''}</span><a href="${esc(SCHED)}" target="_blank" rel="noopener">Открыть таблицу</a></div>`;
+}
+function calDaySheet(s){
+  const names = shiftsOn(s.d) || [];
+  return `<h3>${cap(dayLabel(s.d))}</h3><div class="sub">На смене</div>
+    <div class="stack" style="margin-top:14px">${names.filter(Boolean).length ? names.filter(Boolean).map(n => `<div class="legend" style="margin:0"><span style="${personStyle(n)};font-size:16px;padding:10px 14px">${esc(personName(n))}</span></div>`).join('') : '<div class="mut">Никого не поставили</div>'}</div>${closeBtn}`;
 }
 
 /* ================= ЛЮДИ И КАБИНЕТ ================= */
@@ -975,7 +1222,7 @@ function peopleHtml(){
 }
 function meHtml(){
   const today = iso(startOfToday());
-  const mine = S.shifts.filter(s => s.user_id === S.me.id && s.day >= today).slice(0,5);
+  const mine = myShifts(5);
   const acts = S.logs.filter(l => l.user_id === S.me.id).slice(0,8);
   const pend = isAdmin() ? S.people.filter(p => p.role === 'pending').length : 0;
   return header('Кабинет', '', '') +
@@ -984,7 +1231,7 @@ function meHtml(){
     ${isAdmin() ? `<button class="menu" data-a="tab" data-v="people"><span style="display:flex;align-items:center;gap:10px">${ic('people')}Люди и доступ</span>${pend ? `<span class="badge warn">ждут: ${pend}</span>` : ic('right')}</button>` : ''}
     ${isDev() ? `<button class="menu" data-a="tab" data-v="dev"><span style="display:flex;align-items:center;gap:10px">${ic('code')}Dev-панель</span>${ic('right')}</button>` : ''}
     <h2>Мои ближайшие смены</h2>
-    ${mine.length ? mine.map(s => `<div class="shiftc"><b>${cap(dayLabel(s.day))}</b><div class="t">${hm(s.start_time)} - ${hm(s.end_time)}</div></div>`).join('') : '<div class="mut">Смен пока нет</div>'}
+    ${mine.length ? '<div class="list">' + mine.map(d => `<div class="li"><b>${cap(dayLabel(d))}</b>${d === today ? '<span class="pill ok">сегодня</span>' : ''}</div>`).join('') + '</div>' : `<div class="mut">${SCHED ? 'В графике смен пока нет' : 'График ещё не подключён'}</div>`}
     <h2>Мои последние действия</h2>
     ${acts.length ? acts.map(evHtml).join('') : '<div class="mut">Пока пусто</div>'}
     <h2>Аккаунт</h2>
@@ -1096,7 +1343,7 @@ function drawSheet(){
   document.documentElement.style.overflow = s ? 'hidden' : '';
   if (!s){ el.innerHTML = ''; return; }
   if (!had) $('#toast').innerHTML = '';
-  const map = {product:productSheet, shift:shiftSheet, person:personSheet, order:orderSheet, text:textSheet, ritem:itemSheet, num:numSheet, need:needSheet, nitem:needItemSheet, pass:passSheet, inv:invSheet};
+  const map = {product:productSheet, shift:shiftSheet, person:personSheet, order:orderSheet, text:textSheet, ritem:itemSheet, num:numSheet, need:needSheet, nitem:needItemSheet, pass:passSheet, inv:invSheet, cal:calDaySheet};
   const body = (map[s.t] || (() => ''))(s);
   /* при перерисовке той же шторки сохраняем прокрутку и текст поиска, чтобы можно было нажимать подряд */
   const same = had && drawSheet.last === s.t;
@@ -1326,6 +1573,9 @@ const A = {
   addNeed(){ S.sheet = {t:'need'}; drawSheet(); },
   needItem(el){ S.sheet = {t:'nitem', id:el.dataset.id}; drawSheet(); },
   inv(){ S.sheet = {t:'inv'}; drawSheet(); },
+  calMonth(el){ const [y, m] = S.sched.view.split('-').map(Number), d = new Date(y, m - 1 + (+el.dataset.v), 1); S.sched.view = ym(d.getFullYear(), d.getMonth()); render(); if (!S.sched.data[S.sched.view]) { S.sched.at = 0; loadSchedule(true); } },
+  calRefresh(){ loadSchedule(true).then(() => toast(S.sched.err ? S.sched.err : 'График обновлён')); },
+  calDay(el){ S.sheet = {t:'cal', d:el.dataset.d}; drawSheet(); },
   pick(el){
     const k = el.dataset.k, n = el.dataset.n;
     if (k === 'lunch'){ S.sheet = {t:'num', k, n}; drawSheet(); return; }
@@ -1588,6 +1838,9 @@ setInterval(() => { if (!document.hidden && S.session) quickRefresh(); }, 45000)
 
 /* ---------- старт ---------- */
 if (cfgOk && sb) loadAll(); else { S.booting = false; render(); }
+/* iOS не слушается user-scalable=no: гасим жест масштабирования вручную */
+['gesturestart','gesturechange'].forEach(t => document.addEventListener(t, e => e.preventDefault(), {passive:false}));
+document.addEventListener('touchmove', e => { if (e.touches && e.touches.length > 1) e.preventDefault(); }, {passive:false});
 
 /* ---------- автообновление приложения ----------
    sw.js всегда берёт сайт из сети с проверкой свежести. Когда на GitHub Pages выходит новый sw.js,
