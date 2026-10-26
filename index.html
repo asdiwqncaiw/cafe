@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#1a110c">
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="dark light">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -16,6 +16,13 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
 <title>Склад кафе</title>
+<script>
+/* тема выбирается в Кабинете и запоминается на телефоне; ставим её до отрисовки, чтобы не мигало */
+(function(){ var t = 'dark'; try{ t = localStorage.getItem('cafe.theme') || 'dark'; }catch(e){}
+  if (t === 'auto') t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  var m = document.querySelector('meta[name=theme-color]'); if (m) m.setAttribute('content', t === 'light' ? '#f2f6f1' : '#17100b'); })();
+</script>
 <style>
 :root{
   color-scheme:dark;
@@ -71,15 +78,15 @@ h2{margin:26px 0 10px;font-size:17px;font-weight:700;letter-spacing:-.005em;colo
   -webkit-mask-composite:source-in;
   mask:radial-gradient(circle 10px at calc(100% - var(--stub)) 0,#0000 97%,#000),radial-gradient(circle 10px at calc(100% - var(--stub)) 100%,#0000 97%,#000);
   mask-composite:intersect}
-.ticket::after{content:"";position:absolute;top:14px;bottom:14px;right:var(--stub);border-left:2px dashed rgba(42,26,15,.28)}
+.ticket::after{content:"";position:absolute;top:14px;bottom:14px;right:var(--stub);border-left:2px dashed var(--tk-line)}
 .t-main{padding:16px 14px 16px 18px;min-width:0}
 .t-main b{display:block;font-size:19px;line-height:1.2;font-weight:750;letter-spacing:-.01em}
-.t-main span{display:block;margin-top:4px;font-size:13.5px;color:rgba(42,26,15,.7);line-height:1.35}
+.t-main span{display:block;margin-top:4px;font-size:13.5px;color:var(--tk-sub);line-height:1.35}
 .t-stub{display:grid;place-items:center;padding:10px}
 .t-stub button{width:100%;min-height:46px;border:0;border-radius:14px;background:var(--on-foam);color:var(--foam);font-weight:700;font-size:14.5px;line-height:1.15;padding:6px}
-.t-stub button.soft{background:rgba(42,26,15,.1);color:var(--on-foam)}
+.t-stub button.soft{background:var(--tk-soft);color:var(--on-foam)}
 .ticket.done .t-main b{display:flex;align-items:center;gap:8px}
-.ticket.done .t-main .ic{color:#2f6b3a;width:22px;height:22px;stroke-width:2.4}
+.ticket.done .t-main .ic{color:var(--tk-ok);width:22px;height:22px;stroke-width:2.4}
 .daybar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 14px}
 .daybar .d{flex:1;text-align:center;line-height:1.2}
 .daybar .d b{display:block;font-size:16px}
@@ -93,7 +100,7 @@ h2{margin:26px 0 10px;font-size:17px;font-weight:700;letter-spacing:-.005em;colo
 .chip.on{background:var(--foam);color:var(--on-foam);border-color:transparent;padding:0;gap:0;overflow:hidden;cursor:default}
 .chip.on:active{transform:none}
 .chip.on .cb{width:46px;height:48px;border:0;background:none;color:inherit;display:grid;place-items:center;border-radius:0}
-.chip.on .cb:active{background:rgba(42,26,15,.12);transform:none}
+.chip.on .cb:active{background:var(--tk-soft);transform:none}
 .chip.on .nm{border:0;background:none;color:inherit;font-weight:700;padding:0 2px;min-height:48px;display:inline-flex;align-items:center;gap:7px;min-width:0}
 .cnt{display:inline-grid;place-items:center;min-width:26px;height:26px;padding:0 7px;border-radius:99px;background:var(--on-foam);color:var(--foam);font-size:14px;font-weight:750}
 .bump{animation:pop .3s var(--ease)}
@@ -128,7 +135,7 @@ h2{margin:26px 0 10px;font-size:17px;font-weight:700;letter-spacing:-.005em;colo
 .search{position:relative;margin:0 0 12px}
 .search .ic{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--dim)}
 .search input{padding-left:44px;margin:0}
-input,select,textarea{width:100%;padding:0 15px;min-height:52px;border-radius:14px;border:1px solid var(--line2);background:#150d09;color:var(--ink);margin:0 0 12px}
+input,select,textarea{width:100%;padding:0 15px;min-height:52px;border-radius:14px;border:1px solid var(--line2);background:var(--inbg);color:var(--ink);margin:0 0 12px}
 textarea{padding:13px 15px;line-height:1.4}
 select{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--mut) 50%),linear-gradient(135deg,var(--mut) 50%,transparent 50%);background-position:calc(100% - 22px) 22px,calc(100% - 16px) 22px;background-size:6px 6px;background-repeat:no-repeat;padding-right:38px}
 input::placeholder,textarea::placeholder{color:var(--dim)}
@@ -151,7 +158,7 @@ label{display:block;font-size:13.5px;color:var(--mut);margin:0 0 6px 2px}
 .dayh{font-weight:700;margin:22px 0 10px;font-size:16px}
 .dayh.today{color:var(--foam)}
 .shiftc{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;border:1px solid var(--line);background:var(--s1);border-radius:18px;padding:14px 16px;margin:0 0 8px;color:var(--ink)}
-.shiftc.me{border-color:rgba(240,223,194,.4)}
+.shiftc.me{border-color:var(--foam)}
 .shiftc b{font-size:17px}
 .shiftc .t{font-weight:750;font-size:18px;letter-spacing:-.01em;white-space:nowrap}
 .note{color:var(--mut);font-size:13px;margin-top:2px}
@@ -186,7 +193,7 @@ label{display:block;font-size:13.5px;color:var(--mut);margin:0 0 6px 2px}
 .tabs{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));max-width:536px;margin:0 auto;display:flex;gap:2px;padding:6px;border-radius:28px;
   background:rgba(38,26,19,.86);backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);border:1px solid var(--line2);box-shadow:0 12px 34px rgba(0,0,0,.55);z-index:10}
 .tabs button{flex:1;border:0;background:none;color:var(--mut);padding:8px 0 6px;border-radius:22px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:650;position:relative;min-width:0}
-.tabs button.on{color:var(--foam);background:rgba(240,223,194,.12)}
+.tabs button.on{color:var(--foam);background:var(--tint)}
 .tabs .dot{position:absolute;top:3px;left:calc(50% + 6px);background:var(--bad);color:#2a0d0a;border-radius:99px;font-size:11px;font-weight:800;min-width:18px;height:18px;line-height:18px;text-align:center;padding:0 5px;font-style:normal}
 
 /* шторки */
@@ -209,7 +216,7 @@ label{display:block;font-size:13.5px;color:var(--mut);margin:0 0 6px 2px}
 /* уведомление */
 #toast{position:fixed;left:0;right:0;bottom:calc(96px + env(safe-area-inset-bottom));display:flex;justify-content:center;z-index:40;pointer-events:none;padding:0 16px}
 .toast{pointer-events:auto;background:var(--s3);color:var(--ink);border:1px solid var(--line2);padding:12px 12px 12px 18px;border-radius:16px;box-shadow:0 12px 30px rgba(0,0,0,.5);display:flex;align-items:center;gap:14px;max-width:100%;animation:toastin .28s var(--ease) both;font-weight:600;font-size:15px}
-.toast button{border:0;background:rgba(240,223,194,.14);color:var(--foam);font-weight:700;border-radius:11px;min-height:38px;padding:0 14px;font-size:14.5px}
+.toast button{border:0;background:var(--tint);color:var(--foam);font-weight:700;border-radius:11px;min-height:38px;padding:0 14px;font-size:14.5px}
 @keyframes toastin{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
 
 /* вход */
@@ -233,11 +240,11 @@ label{display:block;font-size:13.5px;color:var(--mut);margin:0 0 6px 2px}
 .live{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--dim);margin-left:8px;vertical-align:1px;transition:background-color .3s,box-shadow .3s}
 .live.on{background:var(--ok);box-shadow:0 0 0 3px var(--okbg)}
 #net{position:fixed;left:0;right:0;top:calc(8px + env(safe-area-inset-top));display:flex;justify-content:center;z-index:30;pointer-events:none;padding:0 16px}
-.netbar{pointer-events:auto;background:#3a2c15;color:var(--warn);border:1px solid rgba(230,189,98,.35);border-radius:99px;padding:8px 16px;font-size:13.5px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.45);animation:toastin .28s var(--ease) both}
+.netbar{pointer-events:auto;background:var(--netbg);color:var(--warn);border:1px solid rgba(230,189,98,.35);border-radius:99px;padding:8px 16px;font-size:13.5px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.45);animation:toastin .28s var(--ease) both}
 .dev .card h2{margin:0 0 6px}
 .dev .card .hint{margin-bottom:12px}
 .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13.5px;word-break:break-all}
-pre.out{white-space:pre-wrap;word-break:break-word;background:#150d09;border:1px solid var(--line2);border-radius:14px;padding:12px;font:12.5px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink2);margin:10px 0 0;max-height:240px;overflow:auto}
+pre.out{white-space:pre-wrap;word-break:break-word;background:var(--inbg);border:1px solid var(--line2);border-radius:14px;padding:12px;font:12.5px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink2);margin:10px 0 0;max-height:240px;overflow:auto}
 .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 .btnrow .btn{padding:0 10px;font-size:15px}
 .urgent{background:linear-gradient(180deg,rgba(232,145,138,.16),rgba(232,145,138,.05));border:1px solid rgba(232,145,138,.38);border-radius:22px;padding:14px 10px 10px;margin:0 0 6px}
@@ -251,7 +258,7 @@ pre.out{white-space:pre-wrap;word-break:break-word;background:#150d09;border:1px
 .mk{min-height:40px;padding:0 13px;border-radius:12px;font-weight:700;font-size:14px;border:1px solid transparent}
 .mk.w{background:var(--warnbg);color:var(--warn);border-color:rgba(230,189,98,.3)}
 .mk.b{background:var(--badbg);color:var(--bad);border-color:rgba(232,145,138,.3)}
-.seg2{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:4px;border-radius:16px;background:#150d09;border:1px solid var(--line2);margin:12px 0 4px}
+.seg2{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:4px;border-radius:16px;background:var(--inbg);border:1px solid var(--line2);margin:12px 0 4px}
 .seg2 button{border:0;border-radius:12px;min-height:44px;background:none;color:var(--mut);font-weight:700;font-size:14.5px}
 .seg2 button.on.w{background:var(--warnbg);color:var(--warn)}
 .seg2 button.on.b{background:var(--badbg);color:var(--bad)}
@@ -263,6 +270,8 @@ pre.out{white-space:pre-wrap;word-break:break-word;background:#150d09;border:1px
   --red:#f04a3e; --redbg:rgba(240,74,62,.16); --red2:#ff7b70;
   --bad:#ff7b70; --badbg:rgba(240,74,62,.16);
   --f:"Onest",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --inbg:#150d09; --bar:#1c130d; --amber:#f2c96b; --tint:rgba(240,223,194,.1); --slot:rgba(245,230,205,.07);
+  --mine:#2a1d12; --netbg:#3a2c15; --tk-sub:rgba(42,26,15,.7); --tk-line:rgba(42,26,15,.28); --tk-soft:rgba(42,26,15,.1); --tk-ok:#2f6b3a;
 }
 /* без зума по двойному тапу и без съезжания вбок */
 html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:hidden}
@@ -304,7 +313,7 @@ h2{font-size:16px;font-weight:700}
 
 /* «закончилось» — ярко-красным, «мало» — янтарным */
 .pill.bad,.badge.bad{background:var(--red);color:#fff}
-.badge.warn,.pill.warn{background:rgba(230,189,98,.18);color:#f2c96b}
+.badge.warn,.pill.warn{background:var(--warnbg);color:var(--amber)}
 .mk.b{background:var(--red);color:#fff;border-color:transparent}
 .tabs .dot{background:var(--red);color:#fff}
 .err{background:var(--redbg);color:var(--red2)}
@@ -317,7 +326,7 @@ h2{font-size:16px;font-weight:700}
 .prod.zero{box-shadow:inset 3px 0 0 var(--red)}
 .prod.zero .pq b{color:var(--red2)}
 .prod.low{box-shadow:inset 3px 0 0 var(--warn)}
-.prod.low .pq b{color:#f2c96b}
+.prod.low .pq b{color:var(--amber)}
 .bar{display:none}
 
 /* срочное: без градиентов и пульсаций */
@@ -330,9 +339,9 @@ h2{font-size:16px;font-weight:700}
 .urgent .need{box-shadow:inset 3px 0 0 var(--red)}
 
 /* нижняя панель прижата к краю, без «стекла» */
-.tabs{left:0;right:0;bottom:0;max-width:none;border-radius:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));background:#1c130d;backdrop-filter:none;-webkit-backdrop-filter:none;border:0;border-top:1px solid var(--line2);box-shadow:none}
+.tabs{left:0;right:0;bottom:0;max-width:none;border-radius:0;padding:6px 6px calc(6px + env(safe-area-inset-bottom));background:var(--bar);backdrop-filter:none;-webkit-backdrop-filter:none;border:0;border-top:1px solid var(--line2);box-shadow:none}
 .tabs button{border-radius:10px;font-weight:500;font-size:11px}
-.tabs button.on{background:rgba(240,223,194,.1)}
+.tabs button.on{background:var(--tint)}
 main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 #toast{bottom:calc(80px + env(safe-area-inset-bottom))}
 .fab{bottom:calc(84px + env(safe-area-inset-bottom));border-radius:14px}
@@ -348,8 +357,8 @@ main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 .cd.today .dn{color:var(--foam)}
 .cd.past{opacity:.55}
 .cd .nm{display:block;font-style:normal;font-size:10.5px;font-weight:600;line-height:1;padding:4px 3px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:clip;min-width:0}
-.cd .nm.empty{background:rgba(245,230,205,.07);color:var(--dim)}
-.cd.mine{background:#2a1d12}
+.cd .nm.empty{background:var(--slot);color:var(--dim)}
+.cd.mine{background:var(--mine)}
 .legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
 .legend span{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:600;padding:6px 10px;border-radius:8px}
 .legend small{font-weight:500;opacity:.8}
@@ -358,6 +367,31 @@ main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 .srcline{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--mut);font-size:13px;margin-top:12px}
 .srcline a{color:var(--ink2)}
 @media (min-width:480px){.cd{min-height:74px}.cd .nm{font-size:12px;padding:5px 5px}}
+
+
+/* ===== светлая тема: бело-зелёная, красный и янтарный остаются заметными ===== */
+:root[data-theme=light]{
+  color-scheme:light;
+  --bg:#f2f6f1; --s1:#ffffff; --s2:#ecf2eb; --s3:#dde8dc;
+  --line:rgba(22,60,35,.09); --line2:rgba(22,60,35,.18);
+  --ink:#14241a; --ink2:#2c4435; --mut:#5a6f62; --dim:#97a89c;
+  --foam:#1d7a4b; --foam2:#17663e; --on-foam:#ffffff;
+  --ok:#1d8a4e; --okbg:rgba(29,138,78,.12);
+  --warn:#b46a00; --warnbg:rgba(232,152,20,.17); --amber:#a35f00;
+  --red:#e0352b; --red2:#cc271d; --bad:#cc271d; --badbg:rgba(224,53,43,.11); --redbg:rgba(224,53,43,.11);
+  --inbg:#ffffff; --bar:#ffffff; --tint:rgba(29,122,75,.11); --slot:#e8eee7; --mine:#e3f2e8; --netbg:#fff3d6;
+  --tk-sub:rgba(255,255,255,.85); --tk-line:rgba(255,255,255,.5); --tk-soft:rgba(255,255,255,.2); --tk-ok:#ffffff;
+}
+:root[data-theme=light] .sheet-bg{background:rgba(18,36,26,.38)}
+:root[data-theme=light] .fab,:root[data-theme=light] .toast,:root[data-theme=light] .netbar{box-shadow:0 8px 22px rgba(18,40,28,.18)}
+:root[data-theme=light] .badge.prog{background:rgba(214,110,10,.14);color:#a8540a}
+:root[data-theme=light] .list,:root[data-theme=light] .card,:root[data-theme=light] .menu,:root[data-theme=light] .cd:not(.blank){box-shadow:0 1px 2px rgba(18,40,28,.05)}
+:root[data-theme=light] .toast{background:#1f3328;color:#fff;border-color:transparent}
+:root[data-theme=light] .toast button{background:rgba(255,255,255,.16);color:#fff}
+:root[data-theme=light] .tabs .dot{border:2px solid #fff}
+.themes{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:4px;border-radius:12px;background:var(--inbg);border:1px solid var(--line2)}
+.themes button{border:0;border-radius:9px;min-height:44px;background:none;color:var(--mut);font-weight:600;font-size:14.5px}
+.themes button.on{background:var(--foam);color:var(--on-foam)}
 
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -488,6 +522,15 @@ const num = v => { const n = parseFloat(String(v == null ? '' : v).replace(',', 
 const plural = (n, f) => { const a = Math.abs(n) % 100, b = a % 10; return f[(a > 10 && a < 20) ? 2 : b > 1 && b < 5 ? 1 : b === 1 ? 0 : 2]; };
 const isAdmin = () => !!S.me && ['admin','owner','dev'].includes(S.me.role);
 const isStaff = () => !!S.me && ['worker','admin','owner','dev'].includes(S.me.role);
+const APP_VERSION = '5.2';
+function themePref(){ try{ return localStorage.getItem('cafe.theme') || 'dark'; }catch(e){ return 'dark'; } }
+function setTheme(v){
+  try{ localStorage.setItem('cafe.theme', v); }catch(e){}
+  const t = v === 'auto' ? (window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : v;
+  document.documentElement.setAttribute('data-theme', t);
+  const m = document.querySelector('meta[name=theme-color]'); if (m) m.setAttribute('content', t === 'light' ? '#f2f6f1' : '#17100b');
+}
+if (window.matchMedia) try{ matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => { if (themePref() === 'auto') setTheme('auto'); }); }catch(e){}
 const isDev = () => !!S.me && S.me.role === 'dev';
 const isBoss = () => !!S.me && (S.me.role === 'owner' || S.me.role === 'dev');
 const emailOf = login => login.trim().toLowerCase() + '@cafe-staff.app';
@@ -925,7 +968,7 @@ function homeHtml(){
     <span>${esc(n.created_by || '')}, ${dmDate(n.created_at)}${n.note ? ', ' + esc(n.note) : ''}</span></button>
     <span class="pill ${n.status==='out'?'bad':'warn'}">${n.status==='out' ? 'закончилось' : 'заканчивается'}</span>
     <button class="done-btn" data-a="needDone" data-id="${n.id}" aria-label="Привезли">${ic('check')}</button></div>`;
-  const lowRows = lowP.map(p => `<button class="need" style="width:100%;border:0;background:none;color:inherit;text-align:left" data-a="open" data-id="${p.id}"><div class="main"><b>${esc(p.name)}</b><span>${esc(zoneName(p.zone))}, минимум ${fmt(p.min_qty)} ${esc(p.unit)}${p.pack_info ? ' · ' + esc(p.pack_info) : ''}</span></div>${isZero(p) ? '<span class="pill bad">закончилось</span>' : `<b style="font-size:22px;white-space:nowrap;color:#f2c96b">${fmt(p.qty)} <small class="mut" style="font-size:13px">${esc(p.unit)}</small></b>`}</button>`).join('');
+  const lowRows = lowP.map(p => `<button class="need" style="width:100%;border:0;background:none;color:inherit;text-align:left" data-a="open" data-id="${p.id}"><div class="main"><b>${esc(p.name)}</b><span>${esc(zoneName(p.zone))}, минимум ${fmt(p.min_qty)} ${esc(p.unit)}${p.pack_info ? ' · ' + esc(p.pack_info) : ''}</span></div>${isZero(p) ? '<span class="pill bad">закончилось</span>' : `<b style="font-size:22px;white-space:nowrap;color:var(--amber)">${fmt(p.qty)} <small class="mut" style="font-size:13px">${esc(p.unit)}</small></b>`}</button>`).join('');
   return header('Сводка', cap(dayLabel(today)) + `<i id="live" class="live ${S.live ? 'on' : ''}" title="Обновляется сама"></i>`) +
     (pend ? `<button class="menu" data-a="tab" data-v="people" style="background:var(--warnbg);border-color:transparent"><span>Ждут подтверждения: ${pend}</span>${ic('right')}</button>` : '') +
     /* главное на экране Гарика: что срочно заказать */
@@ -1083,7 +1126,7 @@ function personKey(n){
   return hit || k;
 }
 const personName = n => { const k = personKey(n); return PERSON[k] ? cap(k) : String(n).trim(); };
-const personStyle = n => { const c = PERSON[personKey(n)]; return c ? `background:${c.bg};color:${c.fg}` : 'background:#5a4a3d;color:#fff'; };
+const personStyle = n => { const c = PERSON[personKey(n)]; return c ? `background:${c.bg};color:${c.fg}` : 'background:var(--s3);color:var(--ink)'; };
 const meKey = () => personKey(S.me && S.me.name);
 
 function parseCsv(t){
@@ -1247,6 +1290,10 @@ function meHtml(){
     ${mine.length ? '<div class="list">' + mine.map(d => `<div class="li"><b>${cap(dayLabel(d))}</b>${d === today ? '<span class="pill ok">сегодня</span>' : ''}</div>`).join('') + '</div>' : `<div class="mut">${SCHED ? 'В графике смен пока нет' : 'График ещё не подключён'}</div>`}
     <h2>Мои последние действия</h2>
     ${acts.length ? acts.map(evHtml).join('') : '<div class="mut">Пока пусто</div>'}
+    <h2>Оформление</h2>
+    <div class="themes">${[['dark','Тёмная'],['light','Светлая'],['auto','Авто']].map(([k, t]) => `<button class="${themePref() === k ? 'on' : ''}" data-a="theme" data-v="${k}">${t}</button>`).join('')}</div>
+    <h2>Приложение</h2>
+    <div class="card rowb"><div><b>Версия ${APP_VERSION}</b><div class="note">Обновляется само при открытии</div></div><button class="btn alt sm" data-a="hardReload">${ic('refresh')}Обновить</button></div>
     <h2>Аккаунт</h2>
     <div class="stack"><button class="btn alt" data-a="pass">Сменить пароль</button><button class="btn danger" data-a="logout">Выйти</button></div>`;
 }
@@ -1641,6 +1688,14 @@ const A = {
   editShift(el){ S.sheet = {t:'shift', id:el.dataset.id}; drawSheet(); },
   person(el){ S.sheet = {t:'person', id:el.dataset.id}; drawSheet(); },
   pass(){ S.sheet = {t:'pass'}; drawSheet(); },
+  theme(el){ setTheme(el.dataset.v); render(); },
+  /* принудительно взять свежую версию: сбросить кэш сайта и перезагрузить */
+  async hardReload(){
+    toast('Обновляю…');
+    try{ if (window.caches) for (const k of await caches.keys()) await caches.delete(k); }catch(e){}
+    try{ const r = navigator.serviceWorker && await navigator.serviceWorker.getRegistration(); if (r) await r.update(); }catch(e){}
+    location.reload();
+  },
   close(){ closeSheet(); },
   closeBg(el, e){ if (e.target === el) closeSheet(); },
   async logout(){ stopLive(); await sb.auth.signOut(); S.session = null; S.me = null; S.sheet = null; S.tab = 'report'; S.tabInit = false; S.lastTab = null; S.dev = {settings:null, out:'', secretShown:false}; render(); },
