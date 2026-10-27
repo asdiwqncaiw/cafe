@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#1a110c">
+<meta name="theme-color" content="#2a1f18">
 <meta name="color-scheme" content="dark light">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -21,7 +21,7 @@
 (function(){ var t = 'dark'; try{ t = localStorage.getItem('cafe.theme') || 'dark'; }catch(e){}
   if (t === 'auto') t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', t);
-  var m = document.querySelector('meta[name=theme-color]'); if (m) m.setAttribute('content', t === 'light' ? '#f2f6f1' : '#17100b'); })();
+  var m = document.querySelector('meta[name=theme-color]'); if (m) m.setAttribute('content', t === 'light' ? '#f2f6f1' : '#2a1f18'); })();
 </script>
 <style>
 :root{
@@ -205,7 +205,8 @@ label{display:block;font-size:13.5px;color:var(--mut);margin:0 0 6px 2px}
 .sheet-bg.closing{animation:fadeout .18s ease forwards}
 .sheet-bg.closing .sheet{animation:sheetout .2s ease-in forwards}
 @keyframes fadeout{to{opacity:0}}@keyframes sheetout{to{transform:translateY(100%)}}
-.grab{width:44px;height:5px;border-radius:9px;background:var(--line2);margin:0 auto 14px}
+.grab{width:44px;height:5px;border-radius:9px;background:var(--line2);margin:0 auto 14px;position:relative;cursor:grab}
+.grab::before{content:"";position:absolute;left:-60px;right:-60px;top:-14px;bottom:-14px}
 .sheet h3{margin:0 0 4px;font-size:23px;font-weight:750;letter-spacing:-.015em}
 .sheet .sub{color:var(--mut);font-size:14px}
 .sheet h2{font-size:16px;margin:22px 0 10px}
@@ -265,17 +266,20 @@ pre.out{white-space:pre-wrap;word-break:break-word;background:var(--inbg);border
 
 /* ===== v5: спокойнее и плотнее, без «нейросетевого» блеска ===== */
 :root{
-  --bg:#17100b; --s1:#21170f; --s2:#2b1f16; --s3:#38291e;
-  --line:rgba(245,230,205,.07); --line2:rgba(245,230,205,.14);
+  --bg:#2a1f18; --s1:#35281f; --s2:#403127; --s3:#4c3b2f;
+  --line:rgba(245,230,205,.08); --line2:rgba(245,230,205,.16);
+  --mut:#b8a38e; --dim:#8a7666;
   --red:#f04a3e; --redbg:rgba(240,74,62,.16); --red2:#ff7b70;
   --bad:#ff7b70; --badbg:rgba(240,74,62,.16);
   --f:"Onest",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-  --inbg:#150d09; --bar:#1c130d; --amber:#f2c96b; --tint:rgba(240,223,194,.1); --slot:rgba(245,230,205,.07);
-  --mine:#2a1d12; --netbg:#3a2c15; --tk-sub:rgba(42,26,15,.7); --tk-line:rgba(42,26,15,.28); --tk-soft:rgba(42,26,15,.1); --tk-ok:#2f6b3a;
+  --inbg:#231a14; --bar:#30241b; --amber:#f2c96b; --tint:rgba(240,223,194,.1); --slot:rgba(245,230,205,.07);
+  --mine:#47331f; --netbg:#4a3820; --tk-sub:rgba(42,26,15,.7); --tk-line:rgba(42,26,15,.28); --tk-soft:rgba(42,26,15,.1); --tk-ok:#2f6b3a;
 }
 /* без зума по двойному тапу и без съезжания вбок */
-html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:hidden}
-body{overflow-x:hidden;max-width:100vw;font-weight:450}
+html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:clip;min-height:100%;background:var(--bg)}
+body{overflow-x:clip;max-width:100vw;font-weight:450;min-height:100vh;min-height:100dvh}
+/* под нижней панелью не должно быть пустой полосы, даже когда iOS тянет страницу */
+.tabs::after{content:"";position:absolute;left:0;right:0;top:100%;height:200px;background:var(--bar)}
 body::before{display:none}
 input,select,textarea{font-size:16px!important;max-width:100%;min-width:0;border-radius:10px}
 input[type=date],input[type=time]{display:block;-webkit-appearance:none;appearance:none;line-height:50px;text-align:left}
@@ -369,6 +373,31 @@ main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 @media (min-width:480px){.cd{min-height:74px}.cd .nm{font-size:12px;padding:5px 5px}}
 
 
+/* ===== v6: кнопки прямо в строке склада ===== */
+.prod{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 14px}
+.prod .main{flex:1;min-width:0;border:0;background:none;color:inherit;text-align:left;padding:4px 0}
+.prod .pm{margin-top:5px}
+.qstep{display:flex;align-items:center;gap:2px;flex:none}
+.qv{border:0;background:none;color:var(--ink);min-width:52px;display:flex;flex-direction:column;align-items:center;line-height:1;padding:2px 0}
+.qv b{font-size:22px;font-weight:700;letter-spacing:-.01em}
+.qv small{font-size:11.5px;color:var(--mut);margin-top:3px}
+.prod.zero .qv b{color:var(--red2)}
+.prod.low .qv b{color:var(--amber)}
+.prod.soon{box-shadow:inset 3px 0 0 var(--orange)}
+.badge.soon,.pill.soon{background:var(--orangebg);color:var(--orange)}
+.st3g{display:grid;grid-template-columns:repeat(3,auto);gap:4px;flex:none}
+.st3g.big{grid-template-columns:repeat(3,1fr);gap:8px}
+.st3{min-height:40px;padding:0 11px;border-radius:9px;border:1px solid var(--line2);background:none;color:var(--mut);font-weight:600;font-size:14px}
+.st3g.big .st3{min-height:54px;font-size:16px}
+.st3.ok.on{background:var(--okbg);color:var(--ok);border-color:transparent}
+.st3.low.on{background:var(--warnbg);color:var(--amber);border-color:transparent}
+.st3.out.on{background:var(--red);color:#fff;border-color:transparent}
+.srow.low{box-shadow:inset 3px 0 0 var(--warn)}
+.srow.out{box-shadow:inset 3px 0 0 var(--red)}
+.need .main span:empty{display:none}
+:root{--orange:#f0a058;--orangebg:rgba(240,160,88,.16)}
+:root[data-theme=light]{--orange:#c2630a;--orangebg:rgba(214,110,10,.13)}
+
 /* ===== светлая тема: бело-зелёная, красный и янтарный остаются заметными ===== */
 :root[data-theme=light]{
   color-scheme:light;
@@ -417,8 +446,8 @@ const UNITS = ['шт', 'кор', 'пак', 'л', 'кг', 'г', 'уп', 'бан']
 const REASONS = ['Просрочка','Брак','Уронили','Для персонала','Другое'];
 const ROLE_RU = {pending:'Ждёт подтверждения',worker:'Работник',admin:'Админ',owner:'Владелец',dev:'Разработчик',blocked:'Заблокирован'};
 /* цеха: bar = кофе, молоко, сиропы, спортпит; kitchen = выпечка, кондитерка, обеды; cups = крышки, стаканы, расходники */
-const ZONES = {bar:'Кофейня и Бар', kitchen:'Кухня и Выпечка', cups:'Стаканы и Расходники'};
-const ZONE_KEYS = ['bar','kitchen','cups'];
+const ZONES = {bar:'Бар', cups:'Стаканы и расходники', kitchen:'Кухня'};
+const ZONE_KEYS = ['bar','cups','kitchen'];
 const stemRx = s => new RegExp('(^|[^а-яё])(' + s + ')', 'i');
 const ZONE_RX = {
   cups: stemRx('крышк|стакан|пакет|салфет|трубоч|размешив|перчат|контейнер|упаковк|ланч.?бокс|вилк|ложк|фольг|плёнк|пленк|держател|подстакан|мусор|губк|моющ|бумаг'),
@@ -441,7 +470,6 @@ const DOT = {writeoff:'bad', restock:'ok', set:'warn', report_add:'acc', report_
 const MENU = {
   writeoff: {
     'Напитки': ['американо','капучино','латте','раф','в турке','сок 0.2'],
-    'Выпечка': ['круассан классический','круассан шоколад','круассан с малиной','круассан сыр-ветчина','слойка ветчина-сыр','конверт ветчина-сыр','слойка кура-грибы','слойка с сосиской','косичка кура-картофель','сочень с творогом','сырные палочки','улитка с маком'],
     'Сэндвичи': ['сэндвич с курицей','сэндвич ветчина-сыр','сэндвич с форелью'],
     'Торты и десерты': ['чизкейк нью-йорк','чизкейк клубничный','чизкейк шоколадный','фисташковый чизкейк','медовик','морковный торт','шоколадный торт','армянская птичка','молочный ломтик','трайфл сникерс','трайфл вишнёвый','трайфл наполеон','трайфл фисташка-малина','тарт ягодный','карамельно-ореховый тарт','муссовый десерт «сыр»','эклер','капкейк','макарон','кейк-попс','эскимо на палочке','маффин морковный','маффин шоколадный','сырники','донат','запеканка'],
     'Обеды': ['борщ','рис','макароны','греча','пицца','крабовый','с тунцом','столичный','винегрет','витаминный','по-купечески']
@@ -449,7 +477,7 @@ const MENU = {
   lunch: ['борщ','рис','макароны','греча','пицца','крабовый','с тунцом','столичный','винегрет','витаминный','по-купечески']
 };
 const PRESETS = {
-  writeoff:['американо','капучино','запеканка','чизкейк нью-йорк','круассан классический'],
+  writeoff:['американо','капучино','запеканка','чизкейк нью-йорк','пончик'],
   lunch:MENU.lunch,
   need:['Крышки большие','Стаканы крафтовые 0,3','Кофе зерно','Молоко 3,2%','Горячий шоколад','Салфетки']
 };
@@ -472,7 +500,7 @@ const S = {
   products:[], logs:[], shifts:[], people:[], report:[], needs:[], dayReports:[], week:[],
   names:{writeoff:[],lunch:[],need:[]},
   reportDay:'', q:'', stockFilter:'all', logUser:'all', logType:'all', showPast:false, sheet:null, bump:null,
-  zone:loadZone(), live:false, submitting:false, needMode:'low',
+  zone:loadZone(), live:false, submitting:false, needMode:'low', soon:{},
   sched:{view:'', data:{}, at:0, err:'', loading:false},
   dev:{settings:null, out:'', secretShown:false}
 };
@@ -522,13 +550,13 @@ const num = v => { const n = parseFloat(String(v == null ? '' : v).replace(',', 
 const plural = (n, f) => { const a = Math.abs(n) % 100, b = a % 10; return f[(a > 10 && a < 20) ? 2 : b > 1 && b < 5 ? 1 : b === 1 ? 0 : 2]; };
 const isAdmin = () => !!S.me && ['admin','owner','dev'].includes(S.me.role);
 const isStaff = () => !!S.me && ['worker','admin','owner','dev'].includes(S.me.role);
-const APP_VERSION = '5.2';
+const APP_VERSION = '6.0';
 function themePref(){ try{ return localStorage.getItem('cafe.theme') || 'dark'; }catch(e){ return 'dark'; } }
 function setTheme(v){
   try{ localStorage.setItem('cafe.theme', v); }catch(e){}
   const t = v === 'auto' ? (window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : v;
   document.documentElement.setAttribute('data-theme', t);
-  const m = document.querySelector('meta[name=theme-color]'); if (m) m.setAttribute('content', t === 'light' ? '#f2f6f1' : '#17100b');
+  const m = document.querySelector('meta[name=theme-color]'); if (m) m.setAttribute('content', t === 'light' ? '#f2f6f1' : '#2a1f18');
 }
 if (window.matchMedia) try{ matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => { if (themePref() === 'auto') setTheme('auto'); }); }catch(e){}
 const isDev = () => !!S.me && S.me.role === 'dev';
@@ -591,6 +619,7 @@ function zoneBar(){
 }
 
 /* ---------- загрузка данных ---------- */
+async function loadSoon(){ try{ const d = await rpcData('product_soon', {p_days:14}); S.soon = {}; (d || []).forEach(r => { S.soon[r.id] = r; }); }catch(e){ S.soon = {}; } }
 async function loadProducts(){ const {data,error} = await sb.from('products').select('*').order('name'); if (error) throw error; S.products = data || []; }
 async function loadLogs(){ const {data,error} = await sb.from('audit_log').select('*').order('at',{ascending:false}).limit(400); if (error) throw error; S.logs = data || []; }
 async function loadShifts(){
@@ -629,7 +658,7 @@ async function loadAll(){
     S.me = me;
     if (!isStaff()) return;
     if (!S.tabInit){ S.tab = isAdmin() ? 'home' : 'report'; S.tabInit = true; }
-    const jobs = [loadProducts(), loadLogs(), loadShifts(), loadReport(), loadNeeds(), loadNames(), loadDayReports()];
+    const jobs = [loadProducts(), loadLogs(), loadShifts(), loadReport(), loadNeeds(), loadNames(), loadDayReports(), loadSoon()];
     if (isAdmin()) jobs.push(loadPeople(), loadWeek());
     await Promise.all(jobs);
     startLive();
@@ -760,7 +789,7 @@ function reportHtml(){
     ? `<div class="ticket done"><div class="t-main"><b>${ic('check')}Отчёт сдан</b><span>${esc(dr.submitted_by || '')}, ${timeOf(dr.submitted_at)}</span></div>
         <div class="t-stub"><button class="soft" data-a="reopen">Открыть снова</button></div></div>`
     : `<div class="ticket"><div class="t-main"><b>${n ? 'Отчёт ведётся' : 'Пока пусто'}</b>
-        <span>${n ? n + ' ' + plural(n, ['запись','записи','записей']) + ', обновлён в ' + timeOf(last) : 'Нажимайте на позиции ниже в течение дня'}</span></div>
+        <span>${n ? n + ' ' + plural(n, ['запись','записи','записей']) + ', обновлён в ' + timeOf(last) : ''}</span></div>
         <div class="t-stub"><button data-a="submit" ${S.submitting ? 'disabled' : ''}>${S.submitting ? 'Сдаю…' : 'Сдать отчёт'}</button></div></div>`;
   /* фильтр цеха: позиции из других цехов прячем, но говорим, сколько скрыто */
   const allW = kindNames('writeoff'), allL = kindNames('lunch');
@@ -775,17 +804,17 @@ function reportHtml(){
   const openNames = new Set(S.needs.map(x => nkey(x.name)));
   const sugg = S.names.need.filter(x => !openNames.has(nkey(x)) && inZone(x, 'need'));
   const hid = n => n ? `скрыто: ${n}` : '';
-  return header(S.reportDay === today ? greet() + ', ' + esc(S.me.name) : dayShort(S.reportDay), S.reportDay === today ? cap(dayLabel(today)) : '') +
+  return header('Отчёт', esc(S.me.name)) +
     `<div class="daybar"><button class="ibtn" data-a="dayPrev" aria-label="Раньше">${ic('left')}</button>
       <div class="d"><b>${dayShort(S.reportDay)}</b><span>${S.reportDay.split('-').reverse().join('.')}</span></div>
       <button class="ibtn" data-a="dayNext" ${S.reportDay >= today ? 'disabled' : ''} aria-label="Позже">${ic('right')}</button></div>` +
     ticket + `<div style="margin-top:14px">${zoneBar()}</div>` +
-    `<div class="h2row" style="margin-top:12px"><h2>Списания</h2><span class="hint">${hid(allW.length - wNames.length) || 'нажмите, чтобы добавить'}</span></div>
+    `<div class="h2row" style="margin-top:12px"><h2>Списания</h2><span class="hint">${hid(allW.length - wNames.length)}</span></div>
      <div class="chips">${wNames.map(x => chipHtml('writeoff', x)).join('')}<button class="chip add" data-a="addItem" data-k="writeoff">${ic('plus')}Другое</button></div>
-     ${showLunch ? `<div class="h2row"><h2>Обеды</h2><span class="hint">${hid(allL.length - lNames.length) || 'сколько порций'}</span></div>
+     ${showLunch ? `<div class="h2row"><h2>Обеды</h2><span class="hint">${hid(allL.length - lNames.length)}</span></div>
      <div class="list">${lNames.map(lunchRow).join('')}<div class="li add"><button data-a="addItem" data-k="lunch">${ic('plus')}Другое блюдо</button></div></div>` : ''}
-     <div class="h2row"><h2>Заканчивается и нет</h2><span class="hint">${hid(hiddenN) || 'список общий'}</span></div>
-     <div class="list">${needs || `<div class="empty-row">${hiddenN ? 'В этом цехе всё есть.' : 'Всё есть.'} Отмечайте заранее, когда что-то заканчивается: заказ едет несколько дней.</div>`}</div>
+     <div class="h2row"><h2>Заканчивается и нет</h2><span class="hint">${hid(hiddenN)}</span></div>
+     <div class="list">${needs || `<div class="empty-row">Всё есть</div>`}</div>
      ${modeSeg()}<div class="chips suggest">${sugg.slice(0, 9).map(x => `<button class="chip" data-a="needQuick" data-n="${esc(x)}">${esc(x)}</button>`).join('')}<button class="chip add" data-a="addNeed">${ic('plus')}Другое</button></div>
      <button class="linkbtn" data-a="reportText">${ic('send')}Текст отчёта для Telegram</button>`;
 }
@@ -926,7 +955,7 @@ function setExact(k, n, v){
 function lowNotListed(){
   const open = new Set(S.needs.map(n => nkey(n.name)));
   return S.products.filter(p => isLow(p) && !open.has(nkey(p.name)))
-    .sort((a, b) => (isZero(b) - isZero(a)) || ['cups','bar','kitchen'].indexOf(a.zone) - ['cups','bar','kitchen'].indexOf(b.zone) || a.name.localeCompare(b.name, 'ru'));
+    .sort((a, b) => (isZero(b) - isZero(a)) || rankOf(a) - rankOf(b) || ['cups','bar','kitchen'].indexOf(a.zone) - ['cups','bar','kitchen'].indexOf(b.zone) || a.name.localeCompare(b.name, 'ru'));
 }
 function orderAllText(){
   const lines = S.needs.map(n => n.name + (n.status === 'low' ? ' (заканчивается)' : ''))
@@ -962,13 +991,15 @@ function homeHtml(){
   const isCrit = n => S.products.some(p => tracked(p) && nkey(p.name) === nkey(n.name));
   const outAll = S.needs.filter(n => n.status === 'out'), lowN = S.needs.filter(n => n.status !== 'out');
   const outCrit = outAll.filter(isCrit), outOther = outAll.filter(n => !isCrit(n));
-  const outN = outCrit;
+  const rk = name => { const p = productByName(name); return p ? rankOf(p) : 99; };
+  const outN = outCrit.slice().sort((a, b) => rk(a.name) - rk(b.name));
   const urgentN = outAll.length + lowP.length;
   const needRow = n => `<div class="need"><button class="main" data-a="needItem" data-id="${n.id}"><b>${esc(n.name)}</b>
     <span>${esc(n.created_by || '')}, ${dmDate(n.created_at)}${n.note ? ', ' + esc(n.note) : ''}</span></button>
     <span class="pill ${n.status==='out'?'bad':'warn'}">${n.status==='out' ? 'закончилось' : 'заканчивается'}</span>
     <button class="done-btn" data-a="needDone" data-id="${n.id}" aria-label="Привезли">${ic('check')}</button></div>`;
-  const lowRows = lowP.map(p => `<button class="need" style="width:100%;border:0;background:none;color:inherit;text-align:left" data-a="open" data-id="${p.id}"><div class="main"><b>${esc(p.name)}</b><span>${esc(zoneName(p.zone))}, минимум ${fmt(p.min_qty)} ${esc(p.unit)}${p.pack_info ? ' · ' + esc(p.pack_info) : ''}</span></div>${isZero(p) ? '<span class="pill bad">закончилось</span>' : `<b style="font-size:22px;white-space:nowrap;color:var(--amber)">${fmt(p.qty)} <small class="mut" style="font-size:13px">${esc(p.unit)}</small></b>`}</button>`).join('');
+  const lowRows = lowP.map(p => `<div class="need"><button class="main" data-a="open" data-id="${p.id}"><b>${esc(p.name)}</b><span>${isZero(p) ? '' : 'осталось ' + fmt(p.qty) + ' ' + esc(p.unit) + ', '}мин. ${fmt(p.min_qty)}${p.pack_info ? ' · ' + esc(p.pack_info) : ''}</span></button>${isZero(p) ? '<span class="pill bad">закончилось</span>' : '<span class="pill warn">мало</span>'}<button class="done-btn" data-a="arrive" data-n="${esc(p.name)}" aria-label="Привезли">${ic('check')}</button></div>`).join('');
+  const soonRows = S.products.filter(p => tracked(p) && !isLow(p) && soonOf(p)).map(p => { const sn = soonOf(p); return `<div class="need"><button class="main" data-a="open" data-id="${p.id}"><b>${esc(p.name)}</b><span>${fmt(p.qty)} ${esc(p.unit)}, уходит ~${fmt(sn.per_day)} в день, едет ${sn.lead_days} дн.</span></button><span class="pill soon">~${Math.max(1, Math.floor(sn.days_left))} дн.</span></div>`; }).join('');
   return header('Сводка', cap(dayLabel(today)) + `<i id="live" class="live ${S.live ? 'on' : ''}" title="Обновляется сама"></i>`) +
     (pend ? `<button class="menu" data-a="tab" data-v="people" style="background:var(--warnbg);border-color:transparent"><span>Ждут подтверждения: ${pend}</span>${ic('right')}</button>` : '') +
     /* главное на экране Гарика: что срочно заказать */
@@ -977,6 +1008,7 @@ function homeHtml(){
           ${outN.length + lowP.length ? `<div class="list">${outN.map(needRow).join('') + lowRows}</div>` : ''}
           ${outOther.length ? `<div class="hint" style="margin:${outN.length + lowP.length ? 14 : 0}px 8px 8px">Тоже закончилось</div><div class="list">${outOther.map(needRow).join('')}</div>` : ''}</div>`
       : `<div class="card rowb" style="gap:12px;justify-content:flex-start"><span class="badge ok">${ic('check')}</span><b>Срочно заказывать нечего</b></div>`) +
+    (soonRows ? `<div class="h2row" style="margin-top:18px"><h2>Скоро закончится</h2></div><div class="list">${soonRows}</div>` : '') +
     (lowN.length ? `<div class="h2row" style="margin-top:18px"><h2>Заказать заранее</h2><span class="hint">заканчивается: ${lowN.length}</span></div><div class="list">${lowN.map(needRow).join('')}</div>` : '') +
     (total ? `<button class="btn" data-a="orderAll" style="margin-top:12px">${ic('copy')}Список заказа для поставщика</button>` : '') +
     `<h2>Отчёт за сегодня</h2><div class="card"><div class="rowb"><b style="font-size:17px">Статус</b>${status}</div>
@@ -994,13 +1026,25 @@ function homeHtml(){
 /* ================= СКЛАД ================= */
 const tracked = p => p.track !== false;
 /* порядок важности внутри цеха: кофе и молоко первыми, потом крышки и стаканы */
-const RANK = [/^кофе/i, /^молоко/i, /^сливки/i, /^крышки/i, /^стаканы/i, /^трубочки/i];
+const RANK = [/^крышки/i, /^стаканы/i, /^кофе/i, /^молоко/i, /^сливки/i, /^трубочки/i];
 const rankOf = p => { const i = RANK.findIndex(r => r.test(p.name)); return i < 0 ? 99 : i; };
 const byRank = (a, b) => rankOf(a) - rankOf(b) || a.name.localeCompare(b.name, 'ru');
 /* 0 на складе — это не «мало», а «закончилось» */
 const isZero = p => tracked(p) && +p.qty <= 0;
 const isLow = p => tracked(p) && (isZero(p) || (+p.min_qty > 0 && +p.qty <= +p.min_qty));
 const needOf = name => S.needs.find(n => nkey(n.name) === nkey(name));
+const productByName = name => S.products.find(p => nkey(p.name) === nkey(name));
+const stkAcc = {}, stkT = {};
+function arrive(name, amount, quiet){
+  buzz();
+  S.needs = S.needs.filter(x => nkey(x.name) !== nkey(name));
+  const p = productByName(name);
+  if (p && amount > 0) p.qty = +p.qty + amount;
+  if (S.sheet) closeSheet();
+  render();
+  send(() => rpc('arrived', {p_name:name, p_amount:amount || null}));
+  if (!quiet) toast(amount > 0 ? 'Привезли: ' + name + ' +' + fmt(amount) : 'Отмечено: ' + name + ' есть');
+}
 function expInfo(p){
   if (!p.expires_on) return null;
   const d = Math.round((new Date(p.expires_on + 'T00:00:00') - startOfToday()) / 864e5);
@@ -1018,29 +1062,31 @@ function stockItems(){
   if (S.stockFilter === 'exp') a = a.filter(p => expInfo(p));
   return a;
 }
-/* товар без счёта (сироп, салфетки): две кнопки без чисел.
-   «Мало» = заканчивается, пора заказать (заказ едет несколько дней); «Нет» = совсем закончилось. */
+/* Два вида товаров.
+   Считаем (кофе, сиропы, вкусовое молоко, стаканы и крышки коробками): − / + прямо в строке.
+   Не считаем (обычное молоко, салфетки): три кнопки «Есть / Мало / Нет», без чисел. */
 function markRow(p){
-  const n = needOf(p.name), d = `data-n="${esc(p.name)}"`;
-  const b = (s, t, cls) => `<button class="mk ${cls}" data-a="needQuick" data-s="${s}" ${d}>${t}</button>`;
-  return `<div class="need"><button class="main" data-a="open" data-id="${p.id}"><b>${esc(p.name)}</b>${p.pack_info ? `<span>${esc(p.pack_info)}</span>` : ''}</button>
-    ${!n ? `<div class="mks">${b('low', 'Мало', 'w')}${b('out', 'Нет', 'b')}</div>`
-      : n.status === 'low' ? `<div class="mks"><span class="pill warn">заканчивается</span>${b('out', 'Нет', 'b')}</div>`
-      : '<span class="pill bad">закончилось</span>'}</div>`;
+  const n = needOf(p.name), st = n ? n.status : 'ok', d = `data-n="${esc(p.name)}"`;
+  const b = (v, t) => `<button class="st3 ${v} ${st === v ? 'on' : ''}" data-a="${v === 'ok' ? 'setOk' : 'needQuick'}" data-s="${v}" ${d}>${t}</button>`;
+  return `<div class="need srow ${st}"><button class="main" data-a="open" data-id="${p.id}"><b>${esc(p.name)}</b>${p.pack_info ? `<span>${esc(p.pack_info)}</span>` : ''}</button>
+    <div class="st3g">${b('ok', 'Есть')}${b('low', 'Мало')}${b('out', 'Нет')}</div></div>`;
 }
 function groupHtml(g){
-  const t = g.filter(tracked).sort(byRank), m = g.filter(p => !tracked(p));
+  const t = g.filter(tracked).sort(byRank), m = g.filter(p => !tracked(p)).sort(byRank);
   return (t.length ? `<div class="list" style="margin-bottom:10px">${t.map(prodCard).join('')}</div>` : '') +
-    (m.length ? `<div class="hint" style="margin:${t.length ? 14 : 0}px 2px 8px">Без счёта: «Мало», когда заканчивается (чтобы успеть заказать), «Нет», когда закончилось</div><div class="list" style="margin-bottom:10px">${m.map(markRow).join('')}</div>` : '');
+    (m.length ? `<div class="list" style="margin-bottom:10px">${m.map(markRow).join('')}</div>` : '');
 }
+const soonOf = p => S.soon[p.id] || null;
 function prodCard(p){
-  const e = expInfo(p), zero = isZero(p), low = !zero && isLow(p);
-  const st = zero ? '<span class="badge bad">закончилось</span>' : low ? '<span class="badge warn">мало</span>' : '';
+  const e = expInfo(p), zero = isZero(p), low = !zero && isLow(p), sn = !zero && !low && soonOf(p);
+  const st = zero ? '<span class="badge bad">закончилось</span>' : low ? '<span class="badge warn">мало</span>'
+    : sn ? `<span class="badge soon">скоро, ~${Math.max(1, Math.floor(sn.days_left))} дн.</span>` : '';
   const meta = st + (e ? `<span class="badge ${e.cls}">${e.t}</span>` : '') + (p.expires_on && !e ? `<span class="badge">до ${dmy(p.expires_on)}</span>` : '');
-  return `<button class="prod ${zero ? 'zero' : low ? 'low' : ''}" data-a="open" data-id="${p.id}"><div style="flex:1;min-width:0"><div class="pn">${esc(p.name)}</div>
-    ${packHtml(p.pack_info)}
-    ${meta ? `<div class="pm">${meta}</div>` : ''}</div>
-    <div class="pq"><b>${fmt(p.qty)}</b><small>${esc(p.unit)}${+p.min_qty > 0 ? ', мин. ' + fmt(p.min_qty) : ''}</small></div></button>`;
+  return `<div class="prod ${zero ? 'zero' : low ? 'low' : sn ? 'soon' : ''}"><button class="main" data-a="open" data-id="${p.id}"><div class="pn">${esc(p.name)}</div>
+    ${packHtml(p.pack_info)}${meta ? `<div class="pm">${meta}</div>` : ''}</button>
+    <div class="qstep"><button class="sb" data-a="stk" data-id="${p.id}" data-d="-1" aria-label="Минус">${ic('minus')}</button>
+      <button class="qv" data-a="open" data-id="${p.id}"><b>${fmt(p.qty)}</b><small>${esc(p.unit)}</small></button>
+      <button class="sb" data-a="stk" data-id="${p.id}" data-d="1" aria-label="Плюс">${ic('plus')}</button></div></div>`;
 }
 function stockListHtml(){
   const a = stockItems();
@@ -1058,7 +1104,7 @@ function stockListHtml(){
 function stockHtml(){
   const pool = S.zone === 'all' ? S.products : S.products.filter(p => zoneOfProduct(p) === S.zone);
   const low = pool.filter(isLow).length, exp = pool.filter(expInfo).length;
-  return header('Склад', S.products.length ? S.products.length + ' ' + plural(S.products.length, ['позиция','позиции','позиций']) : '') +
+  return header('Склад', '') +
     `<div class="search">${ic('search')}<input data-in="q" type="search" placeholder="Найти продукт" value="${esc(S.q)}" autocomplete="off"></div>
     ${zoneBar()}
     <div class="filters">
@@ -1253,7 +1299,7 @@ function shiftsHtml(){
   const state = S.sched.err ? `<div class="err" style="margin-top:12px">${esc(S.sched.err)}</div>`
     : (!days && (entry || !S.sched.loading)) ? `<div class="card" style="margin-top:12px">В таблице нет листа «${title}» или он ещё не заполнен.</div>`
     : (!days ? '<div class="empty">Загружаю график…</div>' : '');
-  return header('График', 'Из Google Таблицы', `<button class="ibtn" data-a="calRefresh" aria-label="Обновить">${ic('refresh')}</button>`) + nav +
+  return header('График', '', `<button class="ibtn" data-a="calRefresh" aria-label="Обновить">${ic('refresh')}</button>`) + nav +
     (days ? `<div class="cal">${grid}</div><div class="legend">${legend}</div>` : '') + state +
     (mk && mine.length ? `<h2>Мои ближайшие смены</h2><div class="list">${mine.map(d => `<div class="li"><b>${cap(dayLabel(d))}</b>${d === todayIso ? '<span class="pill ok">сегодня</span>' : ''}</div>`).join('')}</div>` : '') +
     `<div class="srcline"><span>${entry && entry.at ? 'Обновлено в ' + timeOf(entry.at) : ''}</span><a href="${esc(SCHED)}" target="_blank" rel="noopener">Открыть таблицу</a></div>`;
@@ -1286,14 +1332,13 @@ function meHtml(){
       <div><b style="font-size:19px">${esc(S.me.name)}</b><div class="note" style="margin-top:4px">${ROLE_RU[S.me.role]}, логин ${esc(loginOf(S.session.user.email))}</div></div></div>
     ${isAdmin() ? `<button class="menu" data-a="tab" data-v="people"><span style="display:flex;align-items:center;gap:10px">${ic('people')}Люди и доступ</span>${pend ? `<span class="badge warn">ждут: ${pend}</span>` : ic('right')}</button>` : ''}
     ${isDev() ? `<button class="menu" data-a="tab" data-v="dev"><span style="display:flex;align-items:center;gap:10px">${ic('code')}Dev-панель</span>${ic('right')}</button>` : ''}
-    <h2>Мои ближайшие смены</h2>
-    ${mine.length ? '<div class="list">' + mine.map(d => `<div class="li"><b>${cap(dayLabel(d))}</b>${d === today ? '<span class="pill ok">сегодня</span>' : ''}</div>`).join('') + '</div>' : `<div class="mut">${SCHED ? 'В графике смен пока нет' : 'График ещё не подключён'}</div>`}
+    ${mine.length ? '<h2>Мои ближайшие смены</h2><div class="list">' + mine.map(d => `<div class="li"><b>${cap(dayLabel(d))}</b>${d === today ? '<span class="pill ok">сегодня</span>' : ''}</div>`).join('') + '</div>' : ''}
     <h2>Мои последние действия</h2>
     ${acts.length ? acts.map(evHtml).join('') : '<div class="mut">Пока пусто</div>'}
     <h2>Оформление</h2>
     <div class="themes">${[['dark','Тёмная'],['light','Светлая'],['auto','Авто']].map(([k, t]) => `<button class="${themePref() === k ? 'on' : ''}" data-a="theme" data-v="${k}">${t}</button>`).join('')}</div>
     <h2>Приложение</h2>
-    <div class="card rowb"><div><b>Версия ${APP_VERSION}</b><div class="note">Обновляется само при открытии</div></div><button class="btn alt sm" data-a="hardReload">${ic('refresh')}Обновить</button></div>
+    <div class="card rowb"><b>Версия ${APP_VERSION}</b><button class="btn alt sm" data-a="hardReload">${ic('refresh')}Обновить</button></div>
     <h2>Аккаунт</h2>
     <div class="stack"><button class="btn alt" data-a="pass">Сменить пароль</button><button class="btn danger" data-a="logout">Выйти</button></div>`;
 }
@@ -1403,13 +1448,13 @@ function drawSheet(){
   document.documentElement.style.overflow = s ? 'hidden' : '';
   if (!s){ el.innerHTML = ''; return; }
   if (!had) $('#toast').innerHTML = '';
-  const map = {product:productSheet, shift:shiftSheet, person:personSheet, order:orderSheet, text:textSheet, ritem:itemSheet, num:numSheet, need:needSheet, nitem:needItemSheet, pass:passSheet, inv:invSheet, cal:calDaySheet};
+  const map = {product:productSheet, shift:shiftSheet, person:personSheet, order:orderSheet, text:textSheet, ritem:itemSheet, num:numSheet, need:needSheet, nitem:needItemSheet, pass:passSheet, inv:invSheet, cal:calDaySheet, arrive:arriveSheet};
   const body = (map[s.t] || (() => ''))(s);
   /* при перерисовке той же шторки сохраняем прокрутку и текст поиска, чтобы можно было нажимать подряд */
   const same = had && drawSheet.last === s.t;
   const old = el.querySelector('.sheet'), top = same && old ? old.scrollTop : 0;
   const oq = same ? el.querySelector('[data-in="cq"]') : null, qv = oq ? oq.value : '';
-  el.innerHTML = `<div class="sheet-bg ${had ? 'still' : ''}" data-a="closeBg"><div class="sheet"><div class="grab"></div>${body}</div></div>`;
+  el.innerHTML = `<div class="sheet-bg ${had ? 'still' : ''}" data-a="closeBg"><div class="sheet"><div class="grab" data-a="close"></div>${body}</div></div>`;
   drawSheet.last = s.t;
   if (qv){ const nq = el.querySelector('[data-in="cq"]'); if (nq){ nq.value = qv; filterCatalog(qv); } }
   if (top){ const ns = el.querySelector('.sheet'); if (ns) ns.scrollTop = top; }
@@ -1430,14 +1475,13 @@ function productSheet(s){
   if (s.mode === 'edit') return productForm(p);
   if (!p) return closeBtn;
   if (!tracked(p)){
-    const n = needOf(p.name);
-    return `<h3>${esc(p.name)}</h3><div class="sub">${esc(zoneName(p.zone))} · без счёта, только отмечаем</div>${packHtml(p.pack_info)}
-      <div class="stack" style="margin-top:16px">${n
-        ? `<div class="mut" style="margin-bottom:4px">Сейчас: <b style="color:var(${n.status === 'out' ? '--bad' : '--warn'})">${n.status === 'out' ? 'закончилось' : 'заканчивается'}</b>, отметил(а) ${esc(n.created_by || '')}</div>
-           <button class="btn" data-a="needDone" data-id="${n.id}">${ic('check')}Привезли</button>
-           <button class="btn alt" data-a="needSet" data-id="${n.id}" data-v="${n.status === 'out' ? 'low' : 'out'}">${n.status === 'out' ? 'Ещё есть, но заканчивается' : 'Теперь совсем закончилось'}</button>`
-        : `<button class="btn" data-a="needQuick" data-s="low" data-n="${esc(p.name)}" data-close="1">Заканчивается, пора заказать</button>
-           <button class="btn danger" data-a="needQuick" data-s="out" data-n="${esc(p.name)}" data-close="1">Совсем закончилось</button>`}</div>
+    const n = needOf(p.name), st = n ? n.status : 'ok', d = `data-n="${esc(p.name)}" data-close="1"`;
+    return `<h3>${esc(p.name)}</h3><div class="sub">${esc(zoneName(p.zone))}${n ? ' · отметил(а) ' + esc(n.created_by || '') + ', ' + dmDate(n.created_at) : ''}</div>${packHtml(p.pack_info)}
+      <div class="st3g big" style="margin-top:16px">
+        <button class="st3 ok ${st === 'ok' ? 'on' : ''}" data-a="setOk" ${d}>Есть</button>
+        <button class="st3 low ${st === 'low' ? 'on' : ''}" data-a="needQuick" data-s="low" ${d}>Мало</button>
+        <button class="st3 out ${st === 'out' ? 'on' : ''}" data-a="needQuick" data-s="out" ${d}>Нет</button></div>
+      ${n ? `<button class="btn" data-a="arriveNoQty" data-n="${esc(p.name)}" style="margin-top:12px">${ic('check')}Привезли</button>` : ''}
       ${isAdmin() ? '<button class="btn alt" data-a="editProduct" style="margin-top:10px">Изменить продукт</button>' : ''}${closeBtn}`;
   }
   const modes = {restock:['Приход','Сколько пришло'], writeoff:['Списание','Сколько списать'], set:['Пересчёт','Сколько реально осталось']};
@@ -1464,12 +1508,13 @@ function productForm(p){
     <label>Название</label><input name="name" required value="${n ? '' : esc(p.name)}" placeholder="Молоко 3,2%" ${n ? 'data-focus' : ''}>
     <label>Цех</label><select name="zone">${ZONE_KEYS.map(z => `<option value="${z}" ${(n ? (S.zone !== 'all' ? S.zone : 'bar') : zoneOfProduct(p)) === z ? 'selected' : ''}>${ZONES[z]}</option>`).join('')}</select>
     <label>Учёт</label><select name="track">
-      <option value="1" ${n || tracked(p) ? 'selected' : ''}>Считаем остаток числом, следим за минимумом</option>
-      <option value="0" ${!n && !tracked(p) ? 'selected' : ''}>Без счёта, только отмечаем «закончилось»</option></select>
+      <option value="1" ${n || tracked(p) ? 'selected' : ''}>Считаем: кнопки − / +</option>
+      <option value="0" ${!n && !tracked(p) ? 'selected' : ''}>Не считаем: Есть / Мало / Нет</option></select>
     <div class="grid2"><div><label>Единица</label><select name="unit">${UNITS.concat(!n && !UNITS.includes(p.unit) ? [p.unit] : []).map(u => `<option ${(!n && p.unit===u)?'selected':''}>${esc(u)}</option>`).join('')}</select></div>
     <div><label>Минимум</label><input name="min" inputmode="decimal" value="${n ? '' : raw(p.min_qty)}" placeholder="0"></div></div>
+    <label>Заказ едет, дней</label><input name="lead" inputmode="numeric" value="${n ? '4' : (p.lead_days != null ? p.lead_days : 4)}" placeholder="4">
     <label>Фасовка, подсказка для работников</label><input name="pack" maxlength="120" autocomplete="off" value="${n ? '' : esc(p.pack_info || '')}" placeholder="1 кор = 10 пачек по 50 шт">
-    <div class="hint" style="margin:-6px 0 12px 2px">Крышки считаем коробками (кор), замороженные булочки большими пакетами (пак), зерновой кофе поштучно пачками (шт).</div>
+    
     ${n ? '<label>Сколько сейчас</label><input name="qty" inputmode="decimal" placeholder="0">' : ''}
     <label>Годен до, если нужно</label><input name="exp" type="date" value="${n ? '' : (p.expires_on || '')}">
     <button class="btn" type="submit">Сохранить</button></form>
@@ -1488,6 +1533,15 @@ function invSheet(){
   return `<h3>Пересчёт склада</h3><div class="sub">${S.zone === 'all' ? 'Все цеха' : esc(zoneName(S.zone))}. Впишите, сколько реально стоит, и нажмите «Сохранить». Меняются только исправленные строки.</div>
     <form data-f="inv">${rows || '<div class="empty">Считаемых товаров нет</div>'}
     <button class="btn" type="submit" style="margin-top:16px;position:sticky;bottom:0">Сохранить</button></form>${closeBtn}`;
+}
+function arriveSheet(s){
+  const p = productByName(s.n);
+  return `<h3>Привезли: ${esc(s.n)}</h3><div class="sub">${p ? 'Сейчас ' + fmt(p.qty) + ' ' + esc(p.unit) : ''}</div>${packHtml(p && p.pack_info)}
+    <form data-f="arrive" style="margin-top:14px"><input type="hidden" name="n" value="${esc(s.n)}">
+      <label>Сколько привезли${p ? ', ' + esc(p.unit) : ''}</label>
+      <input class="big" name="v" inputmode="decimal" autocomplete="off" placeholder="0" data-focus>
+      <button class="btn" type="submit">Сохранить</button></form>
+    <button class="btn alt" data-a="arriveNoQty" data-n="${esc(s.n)}" style="margin-top:10px">Привезли, без количества</button>${closeBtn}`;
 }
 function orderSheet(){ return textSheet({title:'Список заказа', sub:'Продукты, которых осталось не больше минимума', text:orderText()}); }
 function orderText(){
@@ -1548,7 +1602,7 @@ function needSheet(){
   });
   const short = n => { const m = n.match(/^Сироп (1883|Bonvida):\s*(.+)$/i); return m ? (m[1] === '1883' ? m[2] : m[2] + ' (' + m[1] + ')') : n; };
   const chip = n => `<button class="chip" data-a="needQuick" data-n="${esc(n)}">${esc(short(n))}</button>`;
-  return `<h3>Что заканчивается?</h3><div class="sub">Отмечайте заранее: заказ едет несколько дней. Сначала выберите, что именно, потом нажимайте товары.</div>
+  return `<h3>Что заканчивается?</h3><div class="sub">Выберите «заканчивается» или «нет», потом товары</div>
     ${modeSeg()}
     ${groups.length ? catalogHtml(groups, chip) : '<div class="empty">Всё из списка уже отмечено</div>'}
     <h2>Нет в списке</h2>
@@ -1604,6 +1658,33 @@ function passSheet(){
 }
 
 /* ================= ДЕЙСТВИЯ ================= */
+/* шторку можно смахнуть вниз: за полоску сверху или когда она прокручена до верха */
+(function(){
+  let y0 = 0, dy = 0, drag = false, sh = null;
+  document.addEventListener('touchstart', e => {
+    sh = e.target.closest ? e.target.closest('#sheet .sheet') : null; if (!sh) return;
+    const nearTop = e.touches[0].clientY - sh.getBoundingClientRect().top < 80;
+    if (!nearTop && (sh.scrollTop > 0 || e.target.closest('input,textarea,select'))){ sh = null; return; }
+    y0 = e.touches[0].clientY; dy = 0; drag = false;
+  }, {passive:true});
+  document.addEventListener('touchmove', e => {
+    if (!sh || e.touches.length > 1) return;
+    dy = e.touches[0].clientY - y0;
+    if (dy > 6 && sh.scrollTop <= 0){
+      drag = true; sh.style.transition = 'none'; sh.style.transform = 'translateY(' + dy + 'px)';
+      if (e.cancelable) e.preventDefault();
+    }
+  }, {passive:false});
+  document.addEventListener('touchend', () => {
+    if (!sh) return;
+    if (drag){
+      sh.style.transition = 'transform .2s ease';
+      if (dy > 90){ sh.style.transform = 'translateY(100%)'; const bg = sh.parentNode; if (bg) bg.classList.add('closing'); setTimeout(() => { S.sheet = null; drawSheet(); }, 190); }
+      else sh.style.transform = '';
+    }
+    sh = null; drag = false;
+  });
+})();
 function closeSheet(){
   const bg = document.querySelector('#sheet .sheet-bg'); if (!bg){ S.sheet = null; return drawSheet(); }
   bg.classList.add('closing'); setTimeout(() => { S.sheet = null; drawSheet(); }, 190);
@@ -1654,10 +1735,30 @@ const A = {
     send(() => rpc('add_needs', {p_items:[{name:n, status:st}]}));
     toast((st === 'low' ? 'Заканчивается: ' : 'Закончилось: ') + n);
   },
+  /* «Привезли»: у считаемого товара спрашиваем, сколько привезли; у остальных сразу снимаем отметку */
   needDone(el){
-    const id = el.dataset.id; if (String(id).startsWith('tmp')) return toast('Секунду, сохраняется');
-    buzz(); S.needs = S.needs.filter(x => x.id !== id); if (S.sheet) { S.sheet = null; drawSheet(); } render();
-    send(() => rpc('resolve_need', {p_id:id})); toast('Отмечено: привезли');
+    const n = S.needs.find(x => x.id === el.dataset.id); if (!n) return;
+    const p = productByName(n.name);
+    if (p && tracked(p)){ S.sheet = {t:'arrive', n:n.name}; drawSheet(); return; }
+    arrive(n.name, null);
+  },
+  arrive(el){ S.sheet = {t:'arrive', n:el.dataset.n}; drawSheet(); },
+  arriveNoQty(el){ arrive(el.dataset.n, null); },
+  setOk(el){ const n = needOf(el.dataset.n); if (!n) return; arrive(el.dataset.n, null, true); },
+  /* − / + в строке склада: быстрые нажатия копятся 1,2 секунды и уходят одной записью */
+  stk(el){
+    const p = S.products.find(x => x.id === el.dataset.id); if (!p) return;
+    const d = +el.dataset.d;
+    if (d < 0 && +p.qty <= 0) return toast('Уже 0. Если закончилось, так и останется');
+    buzz(); p.qty = Math.max(0, +p.qty + d);
+    stkAcc[p.id] = (stkAcc[p.id] || 0) + d; render();
+    if (!stkT[p.id]) waiting++;
+    clearTimeout(stkT[p.id]);
+    stkT[p.id] = setTimeout(() => {
+      const delta = stkAcc[p.id]; delete stkAcc[p.id]; delete stkT[p.id]; waiting--;
+      if (!delta) return scheduleSync();
+      send(() => rpc('change_stock', {p_product:p.id, p_kind:delta > 0 ? 'restock' : 'writeoff', p_amount:Math.abs(delta), p_reason:null, p_expires:null}));
+    }, 1200);
   },
   needSet(el){ const id = el.dataset.id, v = el.dataset.v; const n = S.needs.find(x => x.id === id); if (n) n.status = v; closeSheet(); render(); send(() => rpc('set_need', {p_id:id, p_status:v})); },
   needDel(el){ const id = el.dataset.id; if (!confirm('Убрать из списка?')) return; S.needs = S.needs.filter(x => x.id !== id); closeSheet(); render(); send(() => rpc('delete_need', {p_id:id})); },
@@ -1843,9 +1944,14 @@ const F = {
     try{
       await rpc('save_product', {p_id:fd.get('id') || null, p_name:String(fd.get('name')).trim(), p_unit:fd.get('unit'),
         p_min:num(fd.get('min')) || 0, p_qty:num(fd.get('qty')) || 0, p_expires:fd.get('exp') || null,
-        p_zone:fd.get('zone') || 'bar', p_pack:String(fd.get('pack') || '').trim() || null, p_track:fd.get('track') !== '0'});
+        p_zone:fd.get('zone') || 'bar', p_pack:String(fd.get('pack') || '').trim() || null, p_track:fd.get('track') !== '0', p_lead:Math.round(num(fd.get('lead')) ?? 4)});
       S.sheet = null; await loadAll(); toast('Сохранено');
     }catch(e){ toast(ru(e.message)); }
+  },
+  arrive(f){
+    const fd = new FormData(f), v = num(fd.get('v'));
+    if (v == null || v < 0) return toast('Введите число');
+    arrive(String(fd.get('n')), v);
   },
   async inv(f){
     const ch = [];

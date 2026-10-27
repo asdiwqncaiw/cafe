@@ -15,8 +15,8 @@ name: Daily ping and evening report
 
 on:
   schedule:
-    # 18:00 UTC = 21:00 по Москве. GitHub иногда запускает с опозданием на 5-30 минут.
-    - cron: '0 18 * * *'
+    # 20:00 UTC = 23:00 по Москве. GitHub иногда запускает с опозданием на 5-30 минут.
+    - cron: '0 20 * * *'
   workflow_dispatch:
 
 permissions:
