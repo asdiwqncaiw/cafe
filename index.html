@@ -550,7 +550,7 @@ const num = v => { const n = parseFloat(String(v == null ? '' : v).replace(',', 
 const plural = (n, f) => { const a = Math.abs(n) % 100, b = a % 10; return f[(a > 10 && a < 20) ? 2 : b > 1 && b < 5 ? 1 : b === 1 ? 0 : 2]; };
 const isAdmin = () => !!S.me && ['admin','owner','dev'].includes(S.me.role);
 const isStaff = () => !!S.me && ['worker','admin','owner','dev'].includes(S.me.role);
-const APP_VERSION = '6.0';
+const APP_VERSION = '6.1';
 function themePref(){ try{ return localStorage.getItem('cafe.theme') || 'dark'; }catch(e){ return 'dark'; } }
 function setTheme(v){
   try{ localStorage.setItem('cafe.theme', v); }catch(e){}
@@ -590,7 +590,9 @@ function ru(msg){
   if (/not confirmed/i.test(msg)) return 'В Supabase включено подтверждение почты. Его нужно выключить (см. инструкцию)';
   if (/at least/i.test(msg)) return 'Пароль минимум 6 символов';
   if (/rate limit/i.test(msg)) return 'Слишком много попыток, подождите минуту';
-  if (/fetch|network|Failed|Load failed/i.test(msg)) return 'Нет связи, попробуйте ещё раз';
+  if (/Could not find the function|schema cache|PGRST202|does not exist/i.test(msg)) return 'База не обновлена: запустите новый schema.sql в Supabase (SQL Editor → Run)';
+  /* «нет связи» только для настоящих сетевых ошибок, иначе показываем причину */
+  if (/failed to fetch|load failed|networkerror|network request failed/i.test(msg)) return 'Нет связи, попробуйте ещё раз';
   return msg;
 }
 async function rpc(name, args){ const {error} = await sb.rpc(name, args); if (error) throw error; }
