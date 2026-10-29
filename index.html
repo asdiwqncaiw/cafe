@@ -550,7 +550,7 @@ const num = v => { const n = parseFloat(String(v == null ? '' : v).replace(',', 
 const plural = (n, f) => { const a = Math.abs(n) % 100, b = a % 10; return f[(a > 10 && a < 20) ? 2 : b > 1 && b < 5 ? 1 : b === 1 ? 0 : 2]; };
 const isAdmin = () => !!S.me && ['admin','owner','dev'].includes(S.me.role);
 const isStaff = () => !!S.me && ['worker','admin','owner','dev'].includes(S.me.role);
-const APP_VERSION = '6.1';
+const APP_VERSION = '6.2';
 function themePref(){ try{ return localStorage.getItem('cafe.theme') || 'dark'; }catch(e){ return 'dark'; } }
 function setTheme(v){
   try{ localStorage.setItem('cafe.theme', v); }catch(e){}
@@ -1371,13 +1371,9 @@ function devHtml(){
     </div>
 
     <div class="card">
-      <h2>GitHub Actions</h2>
-      <div class="hint">Секрет нужен для вечерней автосводки. Положите его в репозитории: Settings → Secrets and variables → Actions → <b>CRON_SECRET</b>.</div>
-      <div class="kv"><span class="mut">CRON_SECRET</span>${secret ? `<span class="mono">${S.dev.secretShown ? esc(secret) : '••••••' + esc(secret.slice(-4))}</span>` : '<span class="badge bad">не задан</span>'}</div>
-      <div class="btnrow">
-        ${secret ? `<button class="btn alt" data-a="devSecretShow">${S.dev.secretShown ? 'Скрыть' : 'Показать'}</button><button class="btn alt" data-a="copyText" data-v="${esc(secret)}">${ic('copy')}Копировать</button>` : ''}
-      </div>
-      <button class="btn ${secret ? 'ghost' : ''}" data-a="devSecret" style="margin-top:8px">${secret ? 'Создать новый секрет' : 'Создать секрет'}</button>
+      <h2>Автоматика</h2>
+      <div class="kv"><span class="mut">Вечерняя сводка</span><span>23:00, из базы</span></div>
+      <div class="kv"><span class="mut">Пинг базы</span><span>12:00, GitHub Actions</span></div>
       <div class="kv" style="margin-top:6px"><span class="mut">Часовой пояс</span><span>${esc(st.tz)}, сегодня ${esc(String(st.today || '').split('-').reverse().join('.'))}</span></div>
     </div>
 
