@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-title" content="Склад кафе">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
@@ -550,7 +550,7 @@ const num = v => { const n = parseFloat(String(v == null ? '' : v).replace(',', 
 const plural = (n, f) => { const a = Math.abs(n) % 100, b = a % 10; return f[(a > 10 && a < 20) ? 2 : b > 1 && b < 5 ? 1 : b === 1 ? 0 : 2]; };
 const isAdmin = () => !!S.me && ['admin','owner','dev'].includes(S.me.role);
 const isStaff = () => !!S.me && ['worker','admin','owner','dev'].includes(S.me.role);
-const APP_VERSION = '6.2';
+const APP_VERSION = '6.3';
 function themePref(){ try{ return localStorage.getItem('cafe.theme') || 'dark'; }catch(e){ return 'dark'; } }
 function setTheme(v){
   try{ localStorage.setItem('cafe.theme', v); }catch(e){}
@@ -650,19 +650,56 @@ async function loadNames(){
   S.names = {writeoff:topNames(rows.filter(x => x.kind==='writeoff'), PRESETS.writeoff), lunch:topNames(rows.filter(x => x.kind==='lunch'), PRESETS.lunch), need:topNames(r2.data || [], PRESETS.need)};
 }
 async function setDay(d){ S.reportDay = d; try{ await loadReport(); }catch(e){ toast(ru(e.message)); } render(); }
+/* ---------- загрузка: один запрос вместо десяти ----------
+   app_state отдаёт всё для экранов одним ответом. Последний ответ хранится на телефоне,
+   поэтому при открытии экран рисуется сразу, а свежие данные подтягиваются следом. */
+const SNAP_KEY = 'cafe.snap.v1';
+function applyState(d){
+  S.me = d.me || null;
+  if (!S.me || !isStaff()) return;
+  S.products = d.products || []; S.logs = d.logs || []; S.needs = d.needs || [];
+  S.dayReports = d.day_reports || []; S.people = d.people || []; S.week = d.week || [];
+  S.soon = {}; (d.soon || []).forEach(r => { S.soon[r.id] = r; });
+  const nm = d.names || {}, rows = a => (a || []).map(n => ({name:n}));
+  S.names = {writeoff:topNames(rows(nm.writeoff), PRESETS.writeoff), lunch:topNames(rows(nm.lunch), PRESETS.lunch), need:topNames(rows(nm.need), PRESETS.need)};
+  if (d.report_day === S.reportDay) S.report = d.report || [];
+}
+function saveSnap(d){ try{ localStorage.setItem(SNAP_KEY, JSON.stringify(Object.assign({}, d, {uid:S.session && S.session.user.id, at:Date.now()}))); }catch(e){} }
+function loadSnap(uid){
+  try{ const d = JSON.parse(localStorage.getItem(SNAP_KEY) || 'null'); return d && d.uid === uid && Date.now() - d.at < 3 * 864e5 ? d : null; }catch(e){ return null; }
+}
+let useState = true;
+async function fetchState(){
+  if (useState){
+    try{
+      const day = S.reportDay, d = await rpcData('app_state', {p_day:day});
+      d.report_day = day; applyState(d); saveSnap(d); return;
+    }catch(e){
+      /* база ещё без app_state: работаем по-старому */
+      if (/app_state|schema cache|PGRST202|does not exist/i.test(e.message || '')) useState = false; else throw e;
+    }
+  }
+  const {data:me, error} = await sb.from('profiles').select('*').eq('id', S.session.user.id).maybeSingle();
+  if (error) throw error;
+  S.me = me; if (!isStaff()) return;
+  const jobs = [loadProducts(), loadLogs(), loadReport(), loadNeeds(), loadNames(), loadDayReports(), loadSoon()];
+  if (isAdmin()) jobs.push(loadPeople(), loadWeek());
+  await Promise.all(jobs);
+}
 async function loadAll(){
   try{
     const {data:{session}} = await sb.auth.getSession();
     S.session = session;
     if (!session){ S.me = null; return; }
-    const {data:me,error} = await sb.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
-    if (error) throw error;
-    S.me = me;
+    /* мгновенный старт из сохранённого */
+    if (S.booting){
+      const snap = loadSnap(session.user.id);
+      if (snap){ snap.report_day = snap.report_day === S.reportDay ? snap.report_day : null; applyState(snap);
+        if (isStaff()){ if (!S.tabInit){ S.tab = isAdmin() ? 'home' : 'report'; S.tabInit = true; } S.booting = false; render(); } }
+    }
+    await fetchState();
     if (!isStaff()) return;
     if (!S.tabInit){ S.tab = isAdmin() ? 'home' : 'report'; S.tabInit = true; }
-    const jobs = [loadProducts(), loadLogs(), loadShifts(), loadReport(), loadNeeds(), loadNames(), loadDayReports(), loadSoon()];
-    if (isAdmin()) jobs.push(loadPeople(), loadWeek());
-    await Promise.all(jobs);
     startLive();
     loadSchedule();
   }catch(e){ toast(ru(e.message)); }
@@ -918,7 +955,7 @@ function scheduleSync(){
   clearTimeout(syncT);
   syncT = setTimeout(async () => {
     if (pending || waiting) return;
-    try{ await Promise.all([loadReport(), loadNeeds(), loadDayReports(), loadNames()]); }catch(e){}
+    try{ await fetchState(); }catch(e){}
     render();
   }, 700);
 }
@@ -1688,7 +1725,8 @@ function closeSheet(){
   bg.classList.add('closing'); setTimeout(() => { S.sheet = null; drawSheet(); }, 190);
 }
 const A = {
-  tab(el){ S.tab = el.dataset.v; render(); if (S.tab === 'dev') loadDev(); else quickRefresh(); },
+  /* переключение вкладок без загрузки: данные и так свежие (живое обновление) */
+  tab(el){ S.tab = el.dataset.v; render(); if (S.tab === 'dev') loadDev(); },
   zone(el){ S.zone = el.dataset.v; saveZone(S.zone); render(); },
   refresh(){ S.booting = false; loadAll().then(() => toast('Обновлено')); },
   sf(el){ S.stockFilter = el.dataset.v; render(); },
@@ -1797,7 +1835,7 @@ const A = {
   },
   close(){ closeSheet(); },
   closeBg(el, e){ if (e.target === el) closeSheet(); },
-  async logout(){ stopLive(); await sb.auth.signOut(); S.session = null; S.me = null; S.sheet = null; S.tab = 'report'; S.tabInit = false; S.lastTab = null; S.dev = {settings:null, out:'', secretShown:false}; render(); },
+  async logout(){ try{ localStorage.removeItem(SNAP_KEY); }catch(e){} stopLive(); await sb.auth.signOut(); S.session = null; S.me = null; S.sheet = null; S.tab = 'report'; S.tabInit = false; S.lastTab = null; S.dev = {settings:null, out:'', secretShown:false}; render(); },
   /* --- Dev-панель --- */
   devLoad(){ loadDev(); },
   async devTgTest(){
