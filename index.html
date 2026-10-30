@@ -424,6 +424,9 @@ main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
+<!-- соединение с базой и CDN открываем заранее, пока грузится страница -->
+<link rel="preconnect" href="https://hxzfljbtufynudrkctfb.supabase.co" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 </head>
 <body>
 <div id="app"></div>
@@ -550,7 +553,7 @@ const num = v => { const n = parseFloat(String(v == null ? '' : v).replace(',', 
 const plural = (n, f) => { const a = Math.abs(n) % 100, b = a % 10; return f[(a > 10 && a < 20) ? 2 : b > 1 && b < 5 ? 1 : b === 1 ? 0 : 2]; };
 const isAdmin = () => !!S.me && ['admin','owner','dev'].includes(S.me.role);
 const isStaff = () => !!S.me && ['worker','admin','owner','dev'].includes(S.me.role);
-const APP_VERSION = '6.3';
+const APP_VERSION = '6.4';
 function themePref(){ try{ return localStorage.getItem('cafe.theme') || 'dark'; }catch(e){ return 'dark'; } }
 function setTheme(v){
   try{ localStorage.setItem('cafe.theme', v); }catch(e){}
@@ -668,8 +671,9 @@ function saveSnap(d){ try{ localStorage.setItem(SNAP_KEY, JSON.stringify(Object.
 function loadSnap(uid){
   try{ const d = JSON.parse(localStorage.getItem(SNAP_KEY) || 'null'); return d && d.uid === uid && Date.now() - d.at < 3 * 864e5 ? d : null; }catch(e){ return null; }
 }
-let useState = true;
+let useState = true, fetchAt = 0;
 async function fetchState(){
+  fetchAt = Date.now();
   if (useState){
     try{
       const day = S.reportDay, d = await rpcData('app_state', {p_day:day});
@@ -691,6 +695,7 @@ async function loadAll(){
     const {data:{session}} = await sb.auth.getSession();
     S.session = session;
     if (!session){ S.me = null; return; }
+    restoreOutbox(session.user.id);
     /* мгновенный старт из сохранённого */
     if (S.booting){
       const snap = loadSnap(session.user.id);
@@ -708,7 +713,7 @@ async function loadAll(){
 
 /* ---------- живое обновление (Supabase Realtime) ----------
    Кто-то нажал +1 на другом телефоне: через секунду это видно у всех, без кнопки «Обновить». */
-let liveCh = null, liveT = null;
+let liveCh = null, liveT = null, liveAt = 0;
 function startLive(){
   if (liveCh || !sb || !sb.channel) return;
   liveCh = sb.channel('cafe-live');
@@ -717,16 +722,22 @@ function startLive(){
   liveCh.subscribe(st => { S.live = st === 'SUBSCRIBED'; const d = $('#live'); if (d) d.classList.toggle('on', S.live); });
 }
 function stopLive(){ if (liveCh){ try{ sb.removeChannel(liveCh); }catch(e){} liveCh = null; } S.live = false; }
-function onLive(){ clearTimeout(liveT); liveT = setTimeout(liveRefresh, 900); }
-function liveRefresh(){
+function onLive(){ liveAt = Date.now(); clearTimeout(liveT); liveT = setTimeout(liveRefresh, 900); }
+async function liveRefresh(){
   if (!S.me) return;
+  /* данные уже запрошены после этого события (например, эхо своего же нажатия): второй раз не грузим */
+  if (fetchAt > liveAt) return;
   const a = document.activeElement;
   /* пока человек что-то вводит или его нажатия ещё уходят на сервер, экран не перерисовываем */
   if (S.sheet || pending || waiting || document.hidden || (a && /INPUT|TEXTAREA|SELECT/.test(a.tagName))){ liveT = setTimeout(liveRefresh, 2500); return; }
-  loadAll();
+  try{ await fetchState(); }catch(e){}
+  render();
 }
-async function quickRefresh(){
+async function quickRefresh(force){
   if (!S.me || S.sheet || pending || waiting) return;
+  /* живое обновление работает: опрос нужен только как страховка, не чаще раза в 5 минут.
+     После возврата в приложение (force) обновляем всегда: в фоне события могли потеряться */
+  if (!force && S.live && Date.now() - fetchAt < 5 * 60 * 1000) return;
   const a = document.activeElement; if (a && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) return;
   await loadAll();
 }
@@ -910,13 +921,32 @@ async function retry(fn, tries = 3, pause = 2000){
     catch(e){ if (i >= tries || !isNetErr(e)) throw e; await sleep(pause); }
   }
 }
-function send(fn){
+/* очередь хранится на телефоне: нажатия без интернета не пропадут, даже если закрыть приложение */
+const OUTBOX_KEY = 'cafe.outbox.v1';
+function saveOutbox(){
+  try{
+    if (outbox.length) localStorage.setItem(OUTBOX_KEY, JSON.stringify({uid:S.session && S.session.user.id, items:outbox}));
+    else localStorage.removeItem(OUTBOX_KEY);
+  }catch(e){}
+}
+function restoreOutbox(uid){
+  if (outbox.length) return;
+  try{
+    const d = JSON.parse(localStorage.getItem(OUTBOX_KEY) || 'null');
+    if (!d || !Array.isArray(d.items) || !d.items.length) return;
+    if (d.uid !== uid){ localStorage.removeItem(OUTBOX_KEY); return; }
+    outbox.push(...d.items); pending += d.items.length; drawNet(); flushOutbox();
+  }catch(e){}
+}
+const call = it => rpc(it.name, it.args);
+function send(name, args){
+  const it = {name, args};
   pending++;
   chain = chain.then(async () => {
-    if (outbox.length){ outbox.push(fn); drawNet(); return; }
-    try{ await retry(fn); pending--; }
+    if (outbox.length){ outbox.push(it); saveOutbox(); drawNet(); return; }
+    try{ await retry(() => call(it)); pending--; }
     catch(e){
-      if (isNetErr(e)){ outbox.push(fn); drawNet(); toast('Нет связи. Нажатие сохранится, когда появится интернет'); }
+      if (isNetErr(e)){ outbox.push(it); saveOutbox(); drawNet(); toast('Нет связи. Нажатие сохранится, когда появится интернет'); }
       else { pending--; toast(ru(e.message)); }
     }
   }).finally(scheduleSync);
@@ -929,13 +959,13 @@ async function flushOutbox(){
   try{
     await chain.catch(() => {});
     while (outbox.length){
-      const fn = outbox[0];
-      try{ await retry(fn); outbox.shift(); pending--; done++; }
+      const it = outbox[0];
+      try{ await retry(() => call(it)); outbox.shift(); pending--; done++; }
       catch(e){
         if (isNetErr(e)) break;
         outbox.shift(); pending--; toast(ru(e.message));
       }
-      drawNet();
+      saveOutbox(); drawNet();
     }
   }finally{
     flushing = false; drawNet();
@@ -972,7 +1002,7 @@ function change(k, n, delta){
   if (k === 'writeoff'){
     localSet(k, n, cur + delta);
     S.bump = k + '|' + nkey(n); render();
-    send(() => rpc('change_report_item', {p_day:day, p_kind:k, p_name:n, p_delta:delta, p_set:false}));
+    send('change_report_item', {p_day:day, p_kind:k, p_name:n, p_delta:delta, p_set:false});
     if (delta > 0 && cur === 0) toast('Списано: ' + n, {label:'Отменить', fn:() => change(k, n, -1)});
   }else{
     const nv = Math.max(0, cur + delta);
@@ -980,13 +1010,13 @@ function change(k, n, delta){
     localSet(k, n, nv);
     S.bump = k + '|' + nkey(n); render();
     waiting++; clearTimeout(lunchT[nkey(n)]);
-    lunchT[nkey(n)] = setTimeout(() => { waiting--; send(() => rpc('change_report_item', {p_day:day, p_kind:k, p_name:n, p_delta:nv, p_set:true})); }, 550);
+    lunchT[nkey(n)] = setTimeout(() => { waiting--; send('change_report_item', {p_day:day, p_kind:k, p_name:n, p_delta:nv, p_set:true}); }, 550);
   }
 }
 function setExact(k, n, v){
   const day = S.reportDay;
   localSet(k, n, v); S.bump = k + '|' + nkey(n); render();
-  send(() => rpc('change_report_item', {p_day:day, p_kind:k, p_name:n, p_delta:v, p_set:true}));
+  send('change_report_item', {p_day:day, p_kind:k, p_name:n, p_delta:v, p_set:true});
 }
 
 /* ================= СВОДКА (админ) ================= */
@@ -1081,7 +1111,7 @@ function arrive(name, amount, quiet){
   if (p && amount > 0) p.qty = +p.qty + amount;
   if (S.sheet) closeSheet();
   render();
-  send(() => rpc('arrived', {p_name:name, p_amount:amount || null}));
+  send('arrived', {p_name:name, p_amount:amount || null});
   if (!quiet) toast(amount > 0 ? 'Привезли: ' + name + ' +' + fmt(amount) : 'Отмечено: ' + name + ' есть');
 }
 function expInfo(p){
@@ -1290,12 +1320,14 @@ async function loadSchedule(force){
   const want = [[t.getFullYear(), t.getMonth()], [new Date(t.getFullYear(), t.getMonth() + 1, 1).getFullYear(), (t.getMonth() + 1) % 12], [vy, vm - 1]];
   const seen = new Set();
   try{
-    for (const [y, m] of want){
-      const k = ym(y, m); if (seen.has(k)) continue; seen.add(k);
-      const days = await fetchMonth(y, m, force);
+    /* месяцы грузим одновременно, а не по очереди */
+    const sid = sheetId(SCHED); if (sid) await sheetTabs(sid, force);
+    await Promise.all(want.map(async ([y, m]) => {
+      const k = ym(y, m); if (seen.has(k)) return; seen.add(k);
+      const days = await fetchMonth(y, m, false);
       if (days){ S.sched.data[k] = {days, at:now}; try{ localStorage.setItem('cafe.sched.' + k, JSON.stringify(S.sched.data[k])); }catch(e){} }
       else if (k === S.sched.view) S.sched.data[k] = {days:null, at:now, missing:true};
-    }
+    }));
     S.sched.err = '';
   }catch(e){ S.sched.err = e.message; }
   S.sched.loading = false;
@@ -1392,7 +1424,7 @@ function devHtml(){
   return header('Dev-панель', 'Видят только разработчики', back) + `<div class="dev">
     <div class="card">
       <h2>Telegram-бот</h2>
-      <div class="hint">Сводка уходит из базы при «Сдать отчёт» и вечером из GitHub Actions. Токен хранится только в базе.</div>
+      <div class="hint">Сводка уходит из базы при «Сдать отчёт», а если отчёт не сдан, то сама в 23:00. Токен хранится только в базе.</div>
       <div class="kv"><span class="mut">Токен</span>${st.token_set ? `<span class="badge ok">сохранён ${esc(st.token_mask)}</span>` : '<span class="badge bad">не задан</span>'}</div>
       <div class="kv"><span class="mut">Chat ID</span>${st.chat_id ? `<span class="mono">${esc(st.chat_id)}</span>` : '<span class="badge bad">не задан</span>'}</div>
       <form data-f="tg" style="margin-top:12px">
@@ -1744,7 +1776,7 @@ const A = {
     const r = findRow(S.sheet.k, S.sheet.n); closeSheet();
     if (!r) return;
     S.report = S.report.filter(x => x !== r); render();
-    if (!String(r.id).startsWith('tmp')) send(() => rpc('delete_report_item', {p_id:r.id}));
+    if (!String(r.id).startsWith('tmp')) send('delete_report_item', {p_id:r.id});
   },
   addItem(el){ S.sheet = {t:'ritem', k:el.dataset.k}; drawSheet(); },
   addNeed(){ S.sheet = {t:'need'}; drawSheet(); },
@@ -1768,7 +1800,7 @@ const A = {
     if (ex) ex.status = st;
     else S.needs.push({id:'tmp' + Date.now(), name:n, status:st, created_by:S.me.name, created_at:new Date().toISOString()});
     render();
-    send(() => rpc('add_needs', {p_items:[{name:n, status:st}]}));
+    send('add_needs', {p_items:[{name:n, status:st}]});
     toast((st === 'low' ? 'Заканчивается: ' : 'Закончилось: ') + n);
   },
   /* «Привезли»: у считаемого товара спрашиваем, сколько привезли; у остальных сразу снимаем отметку */
@@ -1793,11 +1825,11 @@ const A = {
     stkT[p.id] = setTimeout(() => {
       const delta = stkAcc[p.id]; delete stkAcc[p.id]; delete stkT[p.id]; waiting--;
       if (!delta) return scheduleSync();
-      send(() => rpc('change_stock', {p_product:p.id, p_kind:delta > 0 ? 'restock' : 'writeoff', p_amount:Math.abs(delta), p_reason:null, p_expires:null}));
+      send('change_stock', {p_product:p.id, p_kind:delta > 0 ? 'restock' : 'writeoff', p_amount:Math.abs(delta), p_reason:null, p_expires:null});
     }, 1200);
   },
-  needSet(el){ const id = el.dataset.id, v = el.dataset.v; const n = S.needs.find(x => x.id === id); if (n) n.status = v; closeSheet(); render(); send(() => rpc('set_need', {p_id:id, p_status:v})); },
-  needDel(el){ const id = el.dataset.id; if (!confirm('Убрать из списка?')) return; S.needs = S.needs.filter(x => x.id !== id); closeSheet(); render(); send(() => rpc('delete_need', {p_id:id})); },
+  needSet(el){ const id = el.dataset.id, v = el.dataset.v; const n = S.needs.find(x => x.id === id); if (n) n.status = v; closeSheet(); render(); send('set_need', {p_id:id, p_status:v}); },
+  needDel(el){ const id = el.dataset.id; if (!confirm('Убрать из списка?')) return; S.needs = S.needs.filter(x => x.id !== id); closeSheet(); render(); send('delete_need', {p_id:id}); },
   async submit(){
     if (S.submitting) return;
     S.submitting = true; render();
@@ -1941,7 +1973,7 @@ const F = {
   num(f){
     const fd = new FormData(f), v = num(fd.get('v')); if (v == null || v < 0) return toast('Введите число');
     const k = fd.get('k'), n = fd.get('n'); closeSheet();
-    if (k === 'writeoff' && v === 0){ const r = findRow(k, n); if (r){ S.report = S.report.filter(x => x !== r); render(); if (!String(r.id).startsWith('tmp')) send(() => rpc('delete_report_item', {p_id:r.id})); } return; }
+    if (k === 'writeoff' && v === 0){ const r = findRow(k, n); if (r){ S.report = S.report.filter(x => x !== r); render(); if (!String(r.id).startsWith('tmp')) send('delete_report_item', {p_id:r.id}); } return; }
     setExact(k, n, v);
   },
   async ritem(f){
@@ -1998,7 +2030,7 @@ const F = {
     if (!ch.length){ closeSheet(); return toast('Ничего не изменилось'); }
     ch.forEach(c => { const p = S.products.find(x => x.id === c.id); if (p) p.qty = c.v; });
     S.sheet = null; render();
-    ch.forEach(c => send(() => rpc('change_stock', {p_product:c.id, p_kind:'set', p_amount:c.v, p_reason:'пересчёт склада', p_expires:null})));
+    ch.forEach(c => send('change_stock', {p_product:c.id, p_kind:'set', p_amount:c.v, p_reason:'пересчёт склада', p_expires:null}));
     toast('Пересчёт сохранён: ' + ch.length + ' ' + plural(ch.length, ['позиция','позиции','позиций']));
     chain.then(() => { if (!outbox.length) loadAll(); });
   },
@@ -2043,7 +2075,7 @@ document.addEventListener('submit', async e => {
   const btn = f.querySelector('button[type=submit]'); if (btn) btn.disabled = true;
   try{ await F[f.dataset.f](f); } finally{ if (btn && btn.isConnected) btn.disabled = false; }
 });
-document.addEventListener('visibilitychange', () => { if (!document.hidden && S.session) quickRefresh(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && S.session) quickRefresh(true); });
 setInterval(() => { if (!document.hidden && S.session) quickRefresh(); }, 45000);
 
 /* ---------- старт ---------- */

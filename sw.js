@@ -3,7 +3,7 @@
 // поэтому после выкладки на GitHub Pages телефоны сразу получают новый код.
 // Копия в кэше нужна только, когда интернета нет совсем.
 // Данные из базы (Supabase) сюда не попадают, только сам сайт.
-const CACHE = 'cafe-shell-v63';
+const CACHE = 'cafe-shell-v64';
 const SHELL = ['./', 'index.html', 'config.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
