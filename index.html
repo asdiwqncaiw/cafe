@@ -553,7 +553,7 @@ const num = v => { const n = parseFloat(String(v == null ? '' : v).replace(',', 
 const plural = (n, f) => { const a = Math.abs(n) % 100, b = a % 10; return f[(a > 10 && a < 20) ? 2 : b > 1 && b < 5 ? 1 : b === 1 ? 0 : 2]; };
 const isAdmin = () => !!S.me && ['admin','owner','dev'].includes(S.me.role);
 const isStaff = () => !!S.me && ['worker','admin','owner','dev'].includes(S.me.role);
-const APP_VERSION = '6.4';
+const APP_VERSION = '6.4.1';
 function themePref(){ try{ return localStorage.getItem('cafe.theme') || 'dark'; }catch(e){ return 'dark'; } }
 function setTheme(v){
   try{ localStorage.setItem('cafe.theme', v); }catch(e){}
@@ -690,7 +690,7 @@ async function fetchState(){
   if (isAdmin()) jobs.push(loadPeople(), loadWeek());
   await Promise.all(jobs);
 }
-async function loadAll(){
+async function loadAll(bg){
   try{
     const {data:{session}} = await sb.auth.getSession();
     S.session = session;
@@ -708,7 +708,7 @@ async function loadAll(){
     startLive();
     loadSchedule();
   }catch(e){ toast(ru(e.message)); }
-  finally{ S.booting = false; render(); }
+  finally{ S.booting = false; render(bg); }
 }
 
 /* ---------- живое обновление (Supabase Realtime) ----------
@@ -731,7 +731,7 @@ async function liveRefresh(){
   /* пока человек что-то вводит или его нажатия ещё уходят на сервер, экран не перерисовываем */
   if (S.sheet || pending || waiting || document.hidden || (a && /INPUT|TEXTAREA|SELECT/.test(a.tagName))){ liveT = setTimeout(liveRefresh, 2500); return; }
   try{ await fetchState(); }catch(e){}
-  render();
+  render(true);
 }
 async function quickRefresh(force){
   if (!S.me || S.sheet || pending || waiting) return;
@@ -739,11 +739,17 @@ async function quickRefresh(force){
      После возврата в приложение (force) обновляем всегда: в фоне события могли потеряться */
   if (!force && S.live && Date.now() - fetchAt < 5 * 60 * 1000) return;
   const a = document.activeElement; if (a && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) return;
-  await loadAll();
+  await loadAll(true);
 }
 
 /* ---------- отрисовка ---------- */
-function render(){
+/* человек вводит число в открытой шторке: её нельзя перерисовывать, иначе поле пересоздаётся и клавиатура закрывается */
+function typingInSheet(){
+  const a = document.activeElement;
+  return !!(S.sheet && a && /INPUT|TEXTAREA|SELECT/.test(a.tagName) && a.closest('#sheet'));
+}
+/* bg = перерисовка после фонового обновления данных, а не после действия человека */
+function render(bg){
   const app = $('#app');
   const y = window.scrollY, same = S.lastTab === S.tab;
   const bumpKey = S.bump; S.bump = null; render.bump = bumpKey;
@@ -769,7 +775,7 @@ function render(){
     '';
   window.scrollTo(0, same ? y : 0);
   S.lastTab = S.tab;
-  drawSheet();
+  if (!(bg && typingInSheet())) drawSheet();
 }
 
 function waitHtml(title, text, noRefresh){
@@ -986,7 +992,7 @@ function scheduleSync(){
   syncT = setTimeout(async () => {
     if (pending || waiting) return;
     try{ await fetchState(); }catch(e){}
-    render();
+    render(true);
   }, 700);
 }
 function localSet(k, n, val, user){
